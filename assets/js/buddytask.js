@@ -24,8 +24,8 @@ jQuery(function(){
     jQuery('.task-board').addClass('loading-board');
     isRefreshing = true;
 
-    if(args.group_id === '0') {
-        args.group_id = '';
+    if(btargs.group_id === '0') {
+        btargs.group_id = '';
     }
 
     renderDialogs();
@@ -60,7 +60,7 @@ jQuery(function(){
                     dueEpoch = task.due_to;
                     due = jQuery.datepicker.formatDate('d M y',new Date(dueEpoch * 1000));
                 } else {
-                    due = args.lang.due_date;
+                    due = btargs.lang.due_date;
                 }
 
                 let assignTo = task.owners ? renderAssignedUsers(task.owners) : '';
@@ -78,8 +78,8 @@ jQuery(function(){
                                             <button type="submit" class="task-menu-button dropdown-toggle" data-toggle="dropdown"><i class="dashicons dashicons-ellipsis"></i></button>
                                             <ul class="dropdown-menu drop-left">`;
 
-                html += `<li><a href="#" class="edit-task-button editable"><i class="dashicons dashicons-edit"></i>` + args.lang.edit + `</a></li>`;
-                html += `<li class="divider"></li><li><a href="#" class="delete-task-button"><i class="dashicons dashicons-no"></i>` + args.lang.delete + `</a></li>`;
+                html += `<li><a href="#" class="edit-task-button editable"><i class="dashicons dashicons-edit"></i>` + btargs.lang.edit + `</a></li>`;
+                html += `<li class="divider"></li><li><a href="#" class="delete-task-button"><i class="dashicons dashicons-no"></i>` + btargs.lang.delete + `</a></li>`;
                 html += `</ul>
                             </div>
                             </div>
@@ -101,7 +101,7 @@ jQuery(function(){
         let html =  '';
         users.forEach(user => {
             html += `<div id="uid-` + user.user_id + `" class="user-avatar" title="` + user.display_name + `">
-                        <a href="/`+args.user_profile_path+`/`+user.username+`">
+                        <a href="/`+btargs.user_profile_path+`/`+user.username+`">
                             <img  src="` + user.avatar_url + `"/>
                         </a>`;
 
@@ -187,11 +187,11 @@ jQuery(function(){
                     "ui-dialog": "task-board-dialog"
                 },
                 buttons: {
-                    [args.lang.delete]: function() {
+                    [btargs.lang.delete]: function() {
                         deleteTask(task_id);
                         jQuery( this ).dialog( "close" );
                     },
-                    [args.lang.cancel]: function() {
+                    [btargs.lang.cancel]: function() {
                         jQuery( this ).dialog( "close" );
                     }
                 }
@@ -253,8 +253,8 @@ jQuery(function(){
         });
 
         let buttons = {};
-        buttons[args.lang.submit] = editTask;
-        buttons[args.lang.cancel] = function() {
+        buttons[btargs.lang.submit] = editTask;
+        buttons[btargs.lang.cancel] = function() {
             editTaskDialog.dialog( "close" );
         }
 
@@ -619,9 +619,9 @@ jQuery(function(){
     }
 
     function attachAutoRefresh(){
-        let pulse = args.heartbeat.interval;
+        let pulse = btargs.heartbeat.interval;
         window.heartbeatSettings = {};
-        window.heartbeatSettings.nonce = args.heartbeat.nonce;
+        window.heartbeatSettings.nonce = btargs.heartbeat.nonce;
 
         // Set the interval and the namespace event
         if (typeof wp !== 'undefined' && typeof wp.heartbeat !== 'undefined' && typeof pulse !== 'undefined') {
@@ -731,12 +731,12 @@ jQuery(function(){
                     "ui-dialog": "task-board-dialog"
                 },
                 buttons: {
-                    [args.lang.delete]: function() {
+                    [btargs.lang.delete]: function() {
                         jQuery(parentItem).remove();
                         updatePercentage();
                         jQuery( this ).dialog( "close" );
                     },
-                    [args.lang.cancel]: function() {
+                    [btargs.lang.cancel]: function() {
                         jQuery( this ).dialog( "close" );
                     }
                 }
@@ -845,25 +845,25 @@ jQuery(function(){
     function renderDialogs(){
         let html = '';
 
-        html += `<div id="edit-task-dialog" style="display: none" title="`+args.lang.edit_task+`">
+        html += `<div id="edit-task-dialog" style="display: none" title="`+btargs.lang.edit_task+`">
             <form id="edit-task-form">`;
         html +=  `<fieldset style="float: left; width: 100%">
-                    <label htmlFor="edit-task-title">`+args.lang.title+`</label>
+                    <label htmlFor="edit-task-title">`+btargs.lang.title+`</label>
                     <input type="text" name="edit-task-title" id="edit-task-title"
                            class="text ui-widget-content ui-corner-all">
                 </fieldset>
                 <fieldset style="float: left; width: 100%">
-                    <label htmlFor="edit-task-description">`+args.lang.description+`</label>
+                    <label htmlFor="edit-task-description">`+btargs.lang.description+`</label>
                     <div type="text" name="edit-task-description" id="edit-task-description"
                          class="text ui-widget-content ui-corner-all"></div>
                 </fieldset>
                 <fieldset style="float: left; width: 73%">
-                    <label htmlFor="edit-task-assign-to">`+args.lang.assign_to+`</label>
+                    <label htmlFor="edit-task-assign-to">`+btargs.lang.assign_to+`</label>
                     <input type="text" name="edit-task-assign-to" id="edit-task-assign-to"
                            class="text ui-widget-content ui-corner-all">
                 </fieldset>
                 <fieldset style="float: left; width: 27%;">
-                    <label htmlFor="edit-task-due-date">`+args.lang.due_date+`</label>
+                    <label htmlFor="edit-task-due-date">`+btargs.lang.due_date+`</label>
                     <input type="text" name="edit-task-due-date" id="edit-task-due-date"
                            class="text ui-widget-content ui-corner-all">
                         <input type="hidden" name="edit-task-due-date-epoch" id="edit-task-due-date-epoch"
@@ -873,7 +873,7 @@ jQuery(function(){
                 <div id="users-invite-list" class="item-list"></div>
 
                 <fieldset style="clear: left; padding-top: 20px">
-                    <label htmlFor="add-todo">`+args.lang.tasks+`</label>
+                    <label htmlFor="add-todo">`+btargs.lang.tasks+`</label>
                     <div class="checklist-progress">
                         <span class="checklist-progress-percentage">0%</span>
                         <div class="checklist-progress-bar">
@@ -881,7 +881,7 @@ jQuery(function(){
                         </div>
                     </div>
                     <input type="text" name="add-todo" id="add-todo" class="text ui-widget-content ui-corner-all"
-                           placeholder="`+args.lang.add_task_press_enter+`">
+                           placeholder="`+btargs.lang.add_task_press_enter+`">
                 </fieldset>
 
                 <ul id="todo-list"></ul>
@@ -892,9 +892,9 @@ jQuery(function(){
             </form>
         </div>`;
 
-        html += `<div id="dialog-delete-confirm" style="display: none" title="`+args.lang.delete_task+`">
+        html += `<div id="dialog-delete-confirm" style="display: none" title="`+btargs.lang.delete_task+`">
             <p><i class="dashicons dashicons-warning delete-confirmation-message"></i>
-                `+args.lang.delete_warning+`
+                `+btargs.lang.delete_warning+`
             </p>
         </div>`;
 

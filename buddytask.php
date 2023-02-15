@@ -271,7 +271,7 @@ class  BuddyTask {
             wp_enqueue_editor();
 
             wp_enqueue_script( 'buddytask-js', buddytask_get_plugin_url() . "assets/js/buddytask.js", array( 'jquery' ), buddytask_get_version() );
-            wp_localize_script('buddytask-js', 'args', array(
+            wp_localize_script('buddytask-js', 'btargs', array(
                 'lang' => array(
                     'due_date' => esc_html__('Due Date', 'buddytask'),
                     'assign_to' => esc_html__('Assign To', 'buddytask'),
