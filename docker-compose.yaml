@@ -1,0 +1,34 @@
+services:
+  db:
+    # We use a mariadb image which supports both amd64 & arm64 architecture
+    image: mariadb:10.6.4-focal
+    # If you really want to use MySQL, uncomment the following line
+    #image: mysql:8.0.27
+    command: '--default-authentication-plugin=mysql_native_password'
+    volumes:
+      - bm_data:/var/lib/mysql
+    restart: always
+    ports:
+      - 3300:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: 123qwe
+      MYSQL_DATABASE: task
+      MYSQL_USER: task
+      MYSQL_PASSWORD: 123qwe
+    expose:
+      - 3306
+      - 33060
+  wordpress:
+    image: wordpress:latest
+    ports:
+      - 9000:80
+    restart: always
+    volumes:
+     - .:/var/www/html/wp-content/plugins/buddytask
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: task
+      WORDPRESS_DB_PASSWORD: 123qwe
+      WORDPRESS_DB_NAME: task
+volumes:
+  bm_data:
