@@ -16,7 +16,8 @@
 }
 
 .tasks-list {
-    width: 206px;
+    min-width: 150px;
+    width: 99%;
     margin: 0 5px 30px 0px;
     height: 715px;
     display: inline-block;
@@ -152,6 +153,8 @@ h2.tasks-list-heading {
     background: 0 0;
     margin-right: 4px;
     box-shadow: 0 0 0;
+    padding: 0 10px 1px;
+    font-size: 13px;
 }
 
 .task-board-dialog .ui-dialog-buttonset button:last-child {
