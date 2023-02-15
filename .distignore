@@ -4,3 +4,5 @@
 
 .distignore
 .gitignore
+
+docker-compose.yml
