@@ -146,14 +146,14 @@ h2.tasks-list-heading {
 .show-hide-details-button {
     background: none;
     cursor: pointer;
-    padding: 0px 5px 0px 0px;
+    padding: 0 5px 0 0;
 }
 
 .task-board-dialog .ui-dialog-buttonset button {
     background: 0 0;
     margin-right: 4px;
     box-shadow: 0 0 0;
-    padding: 0 10px 1px;
+    padding: 5px 10px 5px 10px;
     font-size: 13px;
     border-width: 1px;
     border-style: solid;
