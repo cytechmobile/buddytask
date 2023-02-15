@@ -202,7 +202,6 @@ jQuery(function(){
 
         jQuery('[data-toggle="dropdown"]').dropdown();
 
-        jQuery(".task").on( "click", openEditTaskDialog);
         jQuery( ".edit-task-button" ).on( "click", openEditTaskDialog);
         jQuery( ".view-task-button" ).on( "click", openEditTaskDialog);
         jQuery( ".task-title" ).on( "mouseup", openEditTaskDialog);
