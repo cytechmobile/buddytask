@@ -53,16 +53,14 @@ Use the support forum of this plugin.
 
 == Screenshots ==
 
-1. BuddyTask settings page
-2. Board in a BuddyPress Group
+1. Board inside a BuddyPress Group
+2. Board inside a Page
 3. Rename the lanes of the board
-4. Adding the shortcode in a post / page
-5. Viewing the board in a post / page
-6. Edit a task
-7. Assign a task to specific users
-8. Prioritize the tasks
-9. Prioritize the sub-tasks
-10. Notify the assignees of a task
+4. Edit a task
+5. Prioritize the tasks
+6. Prioritize the sub-tasks
+7. Edit a sub-task
+8. Assign a task to a specific user
 
 == Changelog ==
 
