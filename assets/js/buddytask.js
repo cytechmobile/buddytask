@@ -185,6 +185,9 @@ jQuery(function(){
                 height: "auto",
                 width: 400,
                 modal: true,
+                classes: {
+                    "ui-dialog": "task-board-dialog"
+                },
                 buttons: {
                     [args.lang.delete]: function() {
                         deleteTask(task_id);
@@ -263,6 +266,9 @@ jQuery(function(){
             width: 700,
             modal: true,
             buttons: buttons,
+            classes: {
+                "ui-dialog": "task-board-dialog"
+            },
             open: function( event, ui ) {
                 const task_id = jQuery('#edit-task-form #edit-task-id').val();
 
@@ -598,6 +604,9 @@ jQuery(function(){
     function initializeDatePicker(){
         jQuery('#edit-task-due-date').datepicker({
             dateFormat: 'd M y',
+            classes: {
+                "ui-datepicker": "task-board-datepicker"
+            },
             onSelect: function(date) {
                 const epoch = jQuery.datepicker.formatDate('@', jQuery(this).datepicker('getDate')) / 1000;
                 jQuery('#edit-task-due-date-epoch').val(epoch);
@@ -720,6 +729,9 @@ jQuery(function(){
                 height: "auto",
                 width: 400,
                 modal: true,
+                classes: {
+                    "ui-dialog": "task-board-dialog"
+                },
                 buttons: {
                     [args.lang.delete]: function() {
                         jQuery(parentItem).remove();
