@@ -1009,3 +1009,20 @@ body {
     font-weight: normal;
     font-size: 12px;
 }
+
+.task-board-dialog .ui-button:focus, .task-board-dialog  .ui-button:hover {
+    background: #f6f7f7;
+    border-color: #8c8f94;
+    color: #1d2327;
+}
+
+.task-board-dialog .ui-button {
+    border-width: 1px;
+    border-style: solid;
+    border-radius: 3px;
+    box-sizing: border-box;
+    color: #50575e;
+    border-color: #c3c4c7;
+    background: #f6f7f7;
+    box-shadow: 0 1px 0 #c3c4c7;
+}
