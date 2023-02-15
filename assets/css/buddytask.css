@@ -1038,3 +1038,21 @@ body {
     border-color: #8c8f94;
     color: #1d2327;
 }
+
+/* MOBILE  */
+
+@media only screen and (max-width: 600px) {
+    .task-board {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .tasks-list-wrapper {
+        width: 100%;
+    }
+
+    .task-board-dialog {
+        width: 100% !important;
+        height: 100% !important;
+    }
+}
