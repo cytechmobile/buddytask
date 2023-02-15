@@ -4,6 +4,10 @@
     min-height: 715px;
 }
 
+button {
+    color:unset;
+}
+
 .tasks-list-wrapper {
     display: inline-flex;
     flex-direction: row;
@@ -35,7 +39,18 @@ h2.tasks-list-heading {
     border-radius: 2px;
     border-bottom: 1px solid rgba(0,0,0,.1) !important;
     padding-bottom: 11px !important;
+    display: block;
+    margin-block-start: 0.83em;
+    margin-block-end: 0.83em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    line-height: 1.2 !important;
+    margin-top: 11px !important;
+    margin-bottom: 11px !important;
+}
 
+.dashicons-plus:hover {
+    opacity: 1;
 }
 
 .tasks-list-body {
@@ -123,16 +138,19 @@ h2.tasks-list-heading {
     width: 40px;
     text-align: start;
     padding-left: 5px;
+    all:unset;
 }
 
 .add-new-task-button:hover {
     opacity: 0.3;
+    color: unset !important;
+    cursor: pointer !important;
 }
 
 .tasks {
     list-style-type: none;
-    padding: 0;
-    margin: 0;
+    padding: 0 !important;
+    margin: 0 !important;
     height: 95%;
 }
 
@@ -329,7 +347,7 @@ input.list-names {
 
 
 .task-board-dialog label, .task-board-dialog input { display:block; }
-.task-board-dialog input.text { margin-bottom:20px; width:95%; padding: .4em; }
+.task-board-dialog input.text { margin-bottom:20px; width:100%; padding: .4em; }
 .task-board-dialog fieldset {
     padding:0;
     border:0;
@@ -724,14 +742,14 @@ div.mce-panel{
 
 #add-todo {
     margin-bottom: 5px !important;
-    width: 98% !important;
+    width: 100% !important;
 }
 
 .checklist-progress {
     margin-bottom: 12px;
     position: relative;
     margin-top: 12px;
-    width: 98%;
+    width: 100%;
 }
 
 .checklist-progress-percentage {
@@ -1019,4 +1037,22 @@ body {
     background: #f6f7f7;
     border-color: #8c8f94;
     color: #1d2327;
+}
+
+/* MOBILE  */
+
+@media only screen and (max-width: 600px) {
+    .task-board {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .tasks-list-wrapper {
+        width: 100%;
+    }
+
+    .task-board-dialog {
+        width: 100% !important;
+        height: 100% !important;
+    }
 }

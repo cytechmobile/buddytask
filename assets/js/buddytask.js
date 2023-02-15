@@ -268,6 +268,7 @@ jQuery(function(){
                 "ui-dialog": "task-board-dialog"
             },
             open: function( event, ui ) {
+                jQuery("body").css({ overflow: 'hidden' });
                 const task_id = jQuery('#edit-task-form #edit-task-id').val();
 
                 fetchTodos(task_id);
@@ -286,6 +287,7 @@ jQuery(function(){
                 buddytask_refresh_buttons_state();
             },
             close: function() {
+                jQuery("body").css({ overflow: 'inherit' });
                 jQuery('#edit-task-form #edit-task-list').val('');
                 jQuery('#edit-task-form #edit-task-id').val('');
                 jQuery('#edit-task-form #edit-task-created-by').val('');
@@ -304,7 +306,21 @@ jQuery(function(){
         isRefreshing = false;
     }
 
+    jQuery("#edit-task-description").click(function () {
+        if (jQuery(this).text().includes("Click to edit")) {
+            jQuery(this).text('')
+        }
+    });
+
+    jQuery("#edit-task-title").click(function () {
+        if (jQuery(this).val().includes("Click to edit")) {
+            jQuery(this).val('')
+        }
+    });
+
+
     function openEditTaskDialog(e) {
+        e.preventDefault();
         if(isDragging){
             return;
         }
@@ -608,6 +624,11 @@ jQuery(function(){
             onSelect: function(date) {
                 const epoch = jQuery.datepicker.formatDate('@', jQuery(this).datepicker('getDate')) / 1000;
                 jQuery('#edit-task-due-date-epoch').val(epoch);
+            },
+            beforeShow: function(input, inst) {
+                inst.dpDiv.css({
+                    marginLeft: '-9px'
+                });
             }
         });
     }
