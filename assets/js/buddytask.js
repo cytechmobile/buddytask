@@ -305,6 +305,7 @@ jQuery(function(){
     }
 
     function openEditTaskDialog(e) {
+        e.preventDefault();
         if(isDragging){
             return;
         }
