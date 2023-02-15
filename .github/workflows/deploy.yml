@@ -8,8 +8,8 @@ jobs:
     name: New tag
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-      - uses: actions/checkout@master
+      - name: checkout
+        uses: actions/checkout@v3
       - name: Deploy to WordPress Plugin Directory
         uses: 10up/action-wordpress-plugin-deploy@stable
         env:
