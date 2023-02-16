@@ -61,6 +61,7 @@ Use the support forum of this plugin.
 6. Prioritize the sub-tasks
 7. Edit a sub-task
 8. Assign a task to a specific user
+9. BuddyTAsk settings i group settings
 
 == Changelog ==
 
