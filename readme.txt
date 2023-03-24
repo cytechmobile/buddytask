@@ -4,7 +4,7 @@ Tags:  BuddyTask, task management, task list, kanban, kan ban, buddypress
 Requires at least: 4.5
 Tested up to: 6.1.1
 Requires PHP: 5.3
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -64,6 +64,10 @@ Use the support forum of this plugin.
 9. BuddyTask settings inside a BuddyPress Group
 
 == Changelog ==
+
+= 1.1.0 =
+
+* Added compatibility with BuddyBoss
 
 = 1.0.0 =
 

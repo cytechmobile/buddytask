@@ -3,7 +3,7 @@
 Plugin Name:  BuddyTask
 Plugin URI:
 Description: Adds KanBan like task management boards to Posts, Pages and BuddyPress Groups!
-Version: 1.0.0
+Version: 1.1.0
 Requires at least: 4.6.0
 Tags: BuddyTask, task management, task list, kanban, kan ban, buddypress
 License: GPL V3
@@ -80,7 +80,7 @@ class  BuddyTask {
 	 * @uses plugin_dir_url() to build  buddytask plugin url
 	 */
 	private function setup_globals() {
-		$this->version    = '1.0.0';
+		$this->version    = '1.1.0';
 
 		// Setup some base path and URL information
 		$this->file       = __FILE__;
