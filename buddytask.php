@@ -594,7 +594,10 @@ class  BuddyTask {
         if ($task_assign_to) {
             $exclude = array_unique(array_merge($exclude, $task_assign_to));
         }
-        $args['exclude'] = $exclude;
+
+        if (!empty($exclude)) {
+            $args['exclude'] = $exclude;
+        }
 
         global $bp;
         $group_id = isset($bp->groups->current_group) && is_object($bp->groups->current_group) ? $bp->groups->current_group->id : 0;

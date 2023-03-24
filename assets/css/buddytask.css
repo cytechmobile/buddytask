@@ -206,7 +206,9 @@ h2.tasks-list-heading {
 }
 
 .autocomplete-loading {
-    background: transparent url(../img/loading.gif) no-repeat 98% center;
+    background: transparent url(../img/loading.gif) no-repeat 98% center !important;
+    padding-bottom: 15px !important;
+    padding-left: 16px !important;
 }
 
 .task-board-dialog {
@@ -286,15 +288,11 @@ input.list-names {
     padding-bottom: 0 !important;
 }
 
-.task-board .task-menu{
-    padding-bottom: 5px;
-    padding-left: 5px;
-}
-
 .task-board .task-menu-button{
     background: none;
     cursor: pointer;
     padding: 0px 0px 0px 5px;
+    color: #444444 !important;
 }
 
 .task-menu-button:hover {
@@ -828,7 +826,16 @@ div.mce-panel{
 
 .task-board .dropup,
 .task-board .dropdown {
-    position: relative; }
+    position: relative !important;
+    width: auto !important;
+    box-shadow: none !important;
+    overflow: inherit !important;
+    z-index: inherit !important;
+}
+
+.task-board .dropdown li {
+    border-bottom: none !important;
+}
 
 .task-board .dropdown-toggle:focus {
     outline: 0; }
@@ -990,6 +997,7 @@ task-board a.button, .task-board button {
 
 .task-board .add-new-task-button .dashicons {
     padding-top: 2px;
+    color: #444444;
 }
 
 body {
