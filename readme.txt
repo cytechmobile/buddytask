@@ -2,9 +2,9 @@
 Contributors: cytechltd
 Tags:  BuddyTask, task management, task list, kanban, kan ban, buddypress
 Requires at least: 4.5
-Tested up to: 6.1.1
+Tested up to: 6.2.2
 Requires PHP: 5.3
-Stable tag: 1.1.0
+Stable tag: 1.2.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -64,6 +64,10 @@ Use the support forum of this plugin.
 9. BuddyTask settings inside a BuddyPress Group
 
 == Changelog ==
+
+= 1.2.0 =
+
+* Added a "Delete" button in the "Edit Task" dialog so that users can easily access that functionality.
 
 = 1.1.0 =
 

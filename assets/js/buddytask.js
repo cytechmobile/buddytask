@@ -177,26 +177,7 @@ jQuery(function(){
         jQuery('.delete-task-button').on( 'click', function(e) {
             const target = e.target;
             const task_id = jQuery(target).closest('.task-wrapper').attr('id');
-
-            jQuery( "#dialog-delete-confirm" ).dialog({
-                resizable: false,
-                height: "auto",
-                width: 400,
-                modal: true,
-                classes: {
-                    "ui-dialog": "task-board-dialog"
-                },
-                buttons: {
-                    [btargs.lang.delete]: function() {
-                        deleteTask(task_id);
-                        jQuery( this ).dialog( "close" );
-                    },
-                    [btargs.lang.cancel]: function() {
-                        jQuery( this ).dialog( "close" );
-                    }
-                }
-            });
-
+            openDeleteTaskConfirmationDialog(task_id);
             e.preventDefault();
         });
 
@@ -253,6 +234,11 @@ jQuery(function(){
         });
 
         let buttons = {};
+        buttons[btargs.lang.delete] = function() {
+            const task_id = jQuery('#edit-task-form #edit-task-id').val();
+            openDeleteTaskConfirmationDialog(task_id);
+            editTaskDialog.dialog( "close" );
+        }
         buttons[btargs.lang.submit] = editTask;
         buttons[btargs.lang.cancel] = function() {
             editTaskDialog.dialog( "close" );
@@ -318,6 +304,26 @@ jQuery(function(){
         }
     });
 
+    function openDeleteTaskConfirmationDialog(task_id) {
+        jQuery( "#dialog-delete-confirm" ).dialog({
+            resizable: false,
+            height: "auto",
+            width: 400,
+            modal: true,
+            classes: {
+                "ui-dialog": "task-board-dialog"
+            },
+            buttons: {
+                [btargs.lang.delete]: function() {
+                    deleteTask(task_id);
+                    jQuery( this ).dialog( "close" );
+                },
+                [btargs.lang.cancel]: function() {
+                    jQuery( this ).dialog( "close" );
+                }
+            }
+        });
+    }
 
     function openEditTaskDialog(e) {
         e.preventDefault();
