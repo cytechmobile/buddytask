@@ -207,15 +207,56 @@ jQuery(function(){
         jQuery('.tasks').sortable({
             connectWith: ['.tasks'],
             placeholder: "tasks-highlight",
+            scroll: true,
+            scrollSensitivity: 30,
+            scrollSpeed: 40,
             start: function (e, ui) {
                 isDragging = true;
-                // creates a temporary attribute on the element with the old index
                 jQuery(this).attr('data-previndex', ui.item.index());
                 const list = jQuery(ui.item).closest('.tasks-list').attr('id');
                 jQuery(this).attr('data-prevlist', list);
+
+                // Mobile-specific setup
+                if ('ontouchstart' in window) {
+                    // Store last touch position
+                    let lastTouchY = 0;
+
+                    // Track touch position continuously
+                    jQuery(document).on('touchmove.buddytask', function(e) {
+                        lastTouchY = e.originalEvent.touches[0].clientY;
+                    });
+
+                    // Start scroll monitoring
+                    ui.item.data('scrollInterval', setInterval(function() {
+                        const $window = jQuery(window);
+                        const scrollTop = $window.scrollTop();
+                        const windowHeight = $window.height();
+                        const touchPosition = lastTouchY;
+
+                        // Calculate distances from edges
+                        const distTop = touchPosition;
+                        const distBottom = windowHeight - touchPosition;
+
+                        // Scroll up if near top
+                        if (distTop < 100) {
+                            $window.scrollTop(scrollTop - 20);
+                        }
+                        // Scroll down if near bottom
+                        else if (distBottom < 100) {
+                            $window.scrollTop(scrollTop + 20);
+                        }
+                    }, 50));
+                }
             },
             stop: function (e, ui) {
                 isDragging = false;
+                // Clear scroll interval and touch listener on mobile
+                if ('ontouchstart' in window) {
+                    if (ui.item.data('scrollInterval')) {
+                        clearInterval(ui.item.data('scrollInterval'));
+                    }
+                    jQuery(document).off('touchmove.buddytask');
+                }
 
                 const task_id = ui.item.find('.task-wrapper').attr('id');
                 const task_index = jQuery(ui.item).parent().children('li').index(ui.item);
@@ -227,10 +268,8 @@ jQuery(function(){
                     reorderTask(newList, task_id, task_index);
                 }
 
-                // gets the new and old index then removes the temporary attribute
                 jQuery(this).removeAttr('data-previndex');
                 jQuery(this).removeAttr('data-prevlist');
-
             },
             revert: 100
         });
