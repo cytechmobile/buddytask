@@ -69,6 +69,7 @@ Use the support forum of this plugin.
 
 * Added support for BuddyPress version 12 and above (no longer requires the BuddyPress Classic plugin)
 * Added support for drag-and-drop tasks on mobile devices
+* Added support for HTML content in the task description. The description is now sanitized using wp_kses_post(), which allows only permitted HTML tags for post content.
 * Added support for WordPress version 6.8 and above
 
 = 1.2.0 =

@@ -669,7 +669,7 @@ class  BuddyTask {
         $group_id = isset($_REQUEST['group_id']) ? (int) $_REQUEST['group_id'] : null;;
         $task_uuid = isset($_REQUEST['task_id']) && wp_is_uuid($_REQUEST['task_id']) ? sanitize_text_field($_REQUEST['task_id']) : null;
         $task_title = isset($_REQUEST['task_title']) ? wp_unslash(sanitize_text_field($_REQUEST['task_title'])) : null;
-        $task_description = isset($_REQUEST['task_description']) ? wp_unslash(sanitize_text_field($_REQUEST['task_description'])) : null;
+        $task_description = isset($_REQUEST['task_description']) ? wp_unslash(wp_kses_post($_REQUEST['task_description'])) : null;
         $task_due_date = isset($_REQUEST['task_due_date']) && !empty($_REQUEST['task_due_date']) && is_numeric($_REQUEST['task_due_date']) ?
             floatval($_REQUEST['task_due_date']) : null;
         $task_assign_to = isset($_REQUEST['task_assign_to']) && is_array($_REQUEST['task_assign_to']) ?
