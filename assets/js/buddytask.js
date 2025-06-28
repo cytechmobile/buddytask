@@ -34,6 +34,7 @@ jQuery(function(){
 
     const data = {
         'action' : 'get_board',
+        'group_id': btargs.group_id,
         '_wpnonce': jQuery("input#_wpnonce_get_board").val(),
     };
 
@@ -152,6 +153,7 @@ jQuery(function(){
                 const position = jQuery('#' + list_id).find('.task').length;
                 const data = {
                     'action': 'add_new_task',
+                    'group_id': btargs.group_id,
                     'list_id': list_id,
                     'position': position,
                     '_wpnonce': jQuery("input#_wpnonce_add_new_task").val(),
@@ -205,15 +207,56 @@ jQuery(function(){
         jQuery('.tasks').sortable({
             connectWith: ['.tasks'],
             placeholder: "tasks-highlight",
+            scroll: true,
+            scrollSensitivity: 30,
+            scrollSpeed: 40,
             start: function (e, ui) {
                 isDragging = true;
-                // creates a temporary attribute on the element with the old index
                 jQuery(this).attr('data-previndex', ui.item.index());
                 const list = jQuery(ui.item).closest('.tasks-list').attr('id');
                 jQuery(this).attr('data-prevlist', list);
+
+                // Mobile-specific setup
+                if ('ontouchstart' in window) {
+                    // Store last touch position
+                    let lastTouchY = 0;
+
+                    // Track touch position continuously
+                    jQuery(document).on('touchmove.buddytask', function(e) {
+                        lastTouchY = e.originalEvent.touches[0].clientY;
+                    });
+
+                    // Start scroll monitoring
+                    ui.item.data('scrollInterval', setInterval(function() {
+                        const $window = jQuery(window);
+                        const scrollTop = $window.scrollTop();
+                        const windowHeight = $window.height();
+                        const touchPosition = lastTouchY;
+
+                        // Calculate distances from edges
+                        const distTop = touchPosition;
+                        const distBottom = windowHeight - touchPosition;
+
+                        // Scroll up if near top
+                        if (distTop < 100) {
+                            $window.scrollTop(scrollTop - 20);
+                        }
+                        // Scroll down if near bottom
+                        else if (distBottom < 100) {
+                            $window.scrollTop(scrollTop + 20);
+                        }
+                    }, 50));
+                }
             },
             stop: function (e, ui) {
                 isDragging = false;
+                // Clear scroll interval and touch listener on mobile
+                if ('ontouchstart' in window) {
+                    if (ui.item.data('scrollInterval')) {
+                        clearInterval(ui.item.data('scrollInterval'));
+                    }
+                    jQuery(document).off('touchmove.buddytask');
+                }
 
                 const task_id = ui.item.find('.task-wrapper').attr('id');
                 const task_index = jQuery(ui.item).parent().children('li').index(ui.item);
@@ -225,10 +268,8 @@ jQuery(function(){
                     reorderTask(newList, task_id, task_index);
                 }
 
-                // gets the new and old index then removes the temporary attribute
                 jQuery(this).removeAttr('data-previndex');
                 jQuery(this).removeAttr('data-prevlist');
-
             },
             revert: 100
         });
@@ -412,6 +453,7 @@ jQuery(function(){
         // set ajax data
         const data = {
             'action' : 'edit_task',
+            'group_id': btargs.group_id,
             '_wpnonce': jQuery("input#_wpnonce_edit_task").val(),
             'list_id': list_id,
             'task_id': task_id,
@@ -447,6 +489,7 @@ jQuery(function(){
 
         const data = {
             'action' : 'reorder_task',
+            'group_id': btargs.group_id,
             'list_id': list_id,
             'task_id': task_id,
             'task_index': task_index,
@@ -475,6 +518,7 @@ jQuery(function(){
 
         const data = {
             'action' : 'delete_task',
+            'group_id': btargs.group_id,
             'task_id': task_id,
             '_wpnonce': jQuery("input#_wpnonce_delete_task").val(),
         };
@@ -509,6 +553,7 @@ jQuery(function(){
 
                 const data =  {
                     'action': 'users_autocomplete',
+                    'group_id': btargs.group_id,
                     '_wpnonce': jQuery("input#_wpnonce_users_autocomplete").val(),
                     'term':  request.term,
                     'task_id': task_id,
@@ -547,6 +592,7 @@ jQuery(function(){
 
         const data =  {
             'action': 'add_users_to_assign_list',
+            'group_id': btargs.group_id,
             '_wpnonce': jQuery("input#_wpnonce_add_users_to_assign_list").val(),
             'user_id': user_id
         };
@@ -665,6 +711,7 @@ jQuery(function(){
             if(!isRefreshing) {
                 //Return true to indicate we are expecting data
                 data.refresh_board = true;
+                data.group_id = btargs.group_id;
                 return true;
             }
         });
@@ -682,6 +729,7 @@ jQuery(function(){
         const parent_id = jQuery('#edit-task-id').val();
         const data = {
             'action' : 'get_tasks',
+            'group_id': btargs.group_id,
             'parent_id': parent_id,
             '_wpnonce': jQuery("input#_wpnonce_get_tasks").val(),
         };
@@ -837,6 +885,7 @@ jQuery(function(){
                 label.addClass('autocomplete-loading');
                 const data = {
                     'action' : 'edit_list',
+                    'group_id': btargs.group_id,
                     'id' : id,
                     'name':  newTitle,
                     '_wpnonce': jQuery("input#_wpnonce_edit_list").val(),

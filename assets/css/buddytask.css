@@ -698,7 +698,7 @@ div.mce-panel{
     outline:none;
     font-weight:200;
     position:relative;
-    top:-15px;
+    top:-30px;
     margin:0;
     padding:0;
     width:100%;
@@ -1059,8 +1059,32 @@ body {
         width: 100%;
     }
 
+    .task-board {
+        overflow: visible !important;
+        height: auto !important;
+    }
+
+    .tasks-list-body {
+        overflow: visible !important;
+        min-height: 200px;
+    }
+
     .task-board-dialog {
         width: 100% !important;
         height: 100% !important;
+        overflow-y: auto;
+    }
+
+    .tasks-list {
+        height: auto !important;
+        min-height: 300px;
+    }
+
+    .tasks-highlight {
+        height: 100px !important;
+    }
+
+    #todo-list .input-todo{
+        top:-15px !important;
     }
 }

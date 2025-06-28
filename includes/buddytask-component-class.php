@@ -52,7 +52,12 @@ class  BuddyTask_Component extends BP_Component {
 		$includes = array();
 
 		if ( bp_is_active( 'groups' ) ) {
-			$includes[] = 'buddytask-group-class.php';
+            $is_buddypress_supported = version_compare( bp_get_version(), '12.0.0-alpha', '>=' );
+            if ($is_buddypress_supported) {
+                $includes[] = 'buddytask-group-class.php';
+            } else {
+                $includes[] = 'buddytask-group-legacy-class.php';
+            }
 		}
 
 		parent::includes( $includes );

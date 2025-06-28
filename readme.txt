@@ -2,9 +2,9 @@
 Contributors: cytechltd
 Tags:  BuddyTask, task management, task list, kanban, kan ban, buddypress
 Requires at least: 4.5
-Tested up to: 6.2.2
+Tested up to: 6.8.1
 Requires PHP: 5.3
-Stable tag: 1.2.0
+Stable tag: 1.3.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -64,6 +64,13 @@ Use the support forum of this plugin.
 9. BuddyTask settings inside a BuddyPress Group
 
 == Changelog ==
+
+= 1.3.0 =
+
+* Added support for BuddyPress version 12 and above (no longer requires the BuddyPress Classic plugin)
+* Added support for drag-and-drop tasks on mobile devices
+* Added support for HTML content in the task description. The description is now sanitized using wp_kses_post(), which allows only permitted HTML tags for post content.
+* Added support for WordPress version 6.8 and above
 
 = 1.2.0 =
 
