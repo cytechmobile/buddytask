@@ -252,9 +252,7 @@ class  BuddyTask {
     public function enqueue_scripts(){
         $load_scripts = $this->load_scripts();
         if($load_scripts){
-            global $bp;
             $group_id = function_exists('bp_get_current_group_id') ? bp_get_current_group_id() : 0;
-            $group = $group_id > 0 ? groups_get_group( $group_id ) : null;
             $url     = wp_get_referer();
             $post_id = url_to_postid( $url );
             $user_id = get_current_user_id();
@@ -270,6 +268,7 @@ class  BuddyTask {
             wp_enqueue_script('jquery-effects-core');
             wp_enqueue_editor();
 
+            wp_enqueue_script('jquery-touch-punch', 'jquery.ui.touch-punch.js', array('jquery', 'jquery-ui-sortable'), buddytask_get_version());
             wp_enqueue_script( 'buddytask-js', buddytask_get_plugin_url() . "assets/js/buddytask.js", array( 'jquery' ), buddytask_get_version() );
             wp_localize_script('buddytask-js', 'btargs', array(
                 'lang' => array(
@@ -459,17 +458,18 @@ class  BuddyTask {
     public function get_board(){
         check_ajax_referer( 'buddytask_get_board' );
 
-        $board = $this->get_or_create_board();
+        $group_id = isset($_REQUEST['group_id']) ? (int)$_REQUEST['group_id'] : null;
+        $board = $this->get_or_create_board(null, $group_id);
+
         die(json_encode(get_object_vars($board)));
     }
 
-    public function get_or_create_board($uuid = null){
+    public function get_or_create_board($uuid = null, $group_id = null) {
         require_once( buddytask_get_includes_dir() . 'dao/buddytask-boards-dao.php'  );
         require_once( buddytask_get_includes_dir() . 'dao/buddytask-lists-dao.php'  );
         require_once( buddytask_get_includes_dir() . 'dao/buddytask-tasks-dao.php'  );
         require_once( buddytask_get_includes_dir() . 'dao/buddytask-owners-dao.php'  );
 
-        $group_id = function_exists('bp_get_current_group_id') ? bp_get_current_group_id() : 0;
         $url     = wp_get_referer();
         $post_id = url_to_postid( $url );
 
@@ -548,7 +548,7 @@ class  BuddyTask {
         $parent_uuid = isset($_REQUEST['parent_id']) && wp_is_uuid($_REQUEST['parent_id'])? sanitize_text_field($_REQUEST['parent_id']) : false;
         $position = isset($_REQUEST['position']) && is_numeric($_REQUEST['position'])? intval($_REQUEST['position']) : 0;
 
-        $group_id = function_exists('bp_get_current_group_id') ? bp_get_current_group_id() : 0;
+        $group_id = isset($_REQUEST['group_id']) ? (int) $_REQUEST['group_id'] : null;
         $url     = wp_get_referer();
         $post_id = url_to_postid( $url );
 
@@ -578,13 +578,14 @@ class  BuddyTask {
             $tasksDao->save($task);
         }
 
-        $board = $this->get_or_create_board();
+        $board = $this->get_or_create_board(null, $group_id);
         die(json_encode($board));
     }
 
     public function users_autocomplete() {
         check_ajax_referer('buddytask_users_autocomplete');
 
+        $group_id = isset($_REQUEST['group_id']) ? (int) $_REQUEST['group_id'] : 0;
         $search_terms =  isset($_REQUEST['term']) ? sanitize_text_field($_REQUEST['term']) : null;
         $task_assign_to = isset($_REQUEST['task_assign_to']) && is_array($_REQUEST['task_assign_to']) ?
             array_map('absint', $_REQUEST['task_assign_to']) : array();
@@ -599,8 +600,6 @@ class  BuddyTask {
             $args['exclude'] = $exclude;
         }
 
-        global $bp;
-        $group_id = isset($bp->groups->current_group) && is_object($bp->groups->current_group) ? $bp->groups->current_group->id : 0;
         $suggestions = array();
         if (isset($group_id) && !empty($group_id) && $group_id !== 0) {
             $args['group_id'] = $group_id;
@@ -667,6 +666,7 @@ class  BuddyTask {
     public function edit_task(){
         check_ajax_referer('buddytask_edit_task');
 
+        $group_id = isset($_REQUEST['group_id']) ? (int) $_REQUEST['group_id'] : null;;
         $task_uuid = isset($_REQUEST['task_id']) && wp_is_uuid($_REQUEST['task_id']) ? sanitize_text_field($_REQUEST['task_id']) : null;
         $task_title = isset($_REQUEST['task_title']) ? wp_unslash(sanitize_text_field($_REQUEST['task_title'])) : null;
         $task_description = isset($_REQUEST['task_description']) ? wp_unslash(sanitize_text_field($_REQUEST['task_description'])) : null;
@@ -753,8 +753,8 @@ class  BuddyTask {
         $task->setDonePercent($done_percent);
         $tasksDao->save($task);
 
-        $board = $this->get_or_create_board();
-        $this->send_notifications_to_task_members_on_update('edit', $membersBeforeUpdate, $task);
+        $board = $this->get_or_create_board(null, $group_id);
+        $this->send_notifications_to_task_members_on_update('edit', $membersBeforeUpdate, $task, $group_id);
 
         die(json_encode($board));
     }
@@ -763,6 +763,7 @@ class  BuddyTask {
     public function delete_task(){
         check_ajax_referer('buddytask_delete_task');
 
+        $group_id = isset($_REQUEST['group_id']) ? (int) $_REQUEST['group_id'] : null;
         $task_uuid = isset($_REQUEST['task_id']) && wp_is_uuid($_REQUEST['task_id']) ? sanitize_text_field($_REQUEST['task_id']) : null;
         if($task_uuid === null){
             return false;
@@ -782,15 +783,16 @@ class  BuddyTask {
             $tasksDao->deleteByParentId($task->getId());
             $ownersDao->deleteByTaskId($task->getId());
 
-            $this->send_notifications_to_task_members_on_update('delete', $membersBeforeUpdate, $task);
+            $this->send_notifications_to_task_members_on_update('delete', $membersBeforeUpdate, $task, $group_id);
         }
-        $board = $this->get_or_create_board();
+        $board = $this->get_or_create_board(null, $group_id);
         die(json_encode($board));
     }
 
     public function reorder_task(){
         check_ajax_referer('buddytask_reorder_task');
 
+        $group_id = isset($_REQUEST['group_id']) ? (int) $_REQUEST['group_id'] : null;
         $task_uuid = isset($_REQUEST['task_id']) && wp_is_uuid($_REQUEST['task_id']) ? sanitize_text_field($_REQUEST['task_id']) : null;
         $list_uuid = isset($_REQUEST['list_id']) && wp_is_uuid($_REQUEST['list_id']) ? sanitize_text_field($_REQUEST['list_id']) : null;
         $parent_uuid = isset($_REQUEST['parent_id']) && wp_is_uuid($_REQUEST['parent_id']) ? sanitize_text_field($_REQUEST['parent_id']) : null;
@@ -813,7 +815,7 @@ class  BuddyTask {
             $tasksDao->reorderTask($list_id, $parent_task_id, $task_uuid, $task_index);
         }
 
-        $board = $this->get_or_create_board();
+        $board = $this->get_or_create_board(null, $group_id);
         die(json_encode($board));
     }
 
@@ -871,13 +873,13 @@ class  BuddyTask {
             return $response;
         }
 
-        $board = $this->get_or_create_board();
+        $board = $this->get_or_create_board(null, $data['group_id']);
 
         $response['board'] = $board;
         return $response;
     }
 
-    public function send_notifications_to_task_members_on_update($action, $membersBeforeUpdate, $task){
+    public function send_notifications_to_task_members_on_update($action, $membersBeforeUpdate, $task, $group_id){
         // Bail out early if notifications are not enabled
         if (!function_exists( 'buddypress' ) || !bp_is_active( 'notifications' )) {
             return;
@@ -889,8 +891,7 @@ class  BuddyTask {
             $parent_type = 'post';
             $secondary_item_id = $post_id;
         } else {
-            global $bp;
-            $secondary_item_id = $bp->groups->current_group->id;
+            $secondary_item_id = $group_id;
             $parent_type = 'group';
         }
 
@@ -909,18 +910,42 @@ class  BuddyTask {
         }
     }
 
-    public function add_notifications($action, $recipients, $task_id, $secondary_item_id, $title, $parent_type) {
-        foreach ($recipients as $user_id) {
-            if ($user_id != get_current_user_id()) {
-                $notification_id = bp_notifications_add_notification(array(
-                    'user_id' => $user_id,
-                    'item_id' => $task_id,
-                    'secondary_item_id' => $secondary_item_id,
-                    'component_name' => buddytask_get_slug(),
-                    'component_action' => $action,
-                ));
-                bp_notifications_add_meta($notification_id, 'task_title', $title);
-                bp_notifications_add_meta($notification_id, 'parent_type', $parent_type);
+    public function add_notifications( $action, $recipients, $task_id, $secondary_item_id, $title, $parent_type ) {
+        if (! is_array( $recipients ) || empty( $recipients ) ) {
+            return;
+        }
+
+        $action_user_id = bp_loggedin_user_id();
+
+        foreach ( $recipients as $user_id ) {
+            // Ensure we are working with an integer and don't notify the user who triggered the action.
+            if ( (int) $user_id!== $action_user_id ) {
+                $notification_id = bp_notifications_add_notification( array(
+                    'user_id'           => (int) $user_id,
+                    'item_id'           => (int) $task_id,
+                    'secondary_item_id' => (int) $secondary_item_id,
+                    'component_name'    => buddytask_get_slug(), // Assuming this function returns your component's slug.
+                    'component_action'  => $action,
+                    'date_notified'     => bp_core_current_time(), // It's best practice to include the timestamp.
+                    'is_new'            => 1,                      // Explicitly mark as a new notification.
+                ) );
+
+                error_log(json_encode(array(
+                    'user_id'           => (int) $user_id,
+                    'item_id'           => (int) $task_id,
+                    'secondary_item_id' => (int) $secondary_item_id,
+                    'component_name'    => buddytask_get_slug(), // Assuming this function returns your component's slug.
+                    'component_action'  => $action,
+                    'date_notified'     => bp_core_current_time(), // It's best practice to include the timestamp.
+                    'is_new'            => 1,
+                    'id' => $notification_id// Explicitly mark as a new notification.
+                )));
+
+                // Only add meta if the notification was successfully created.
+                if ( $notification_id ) {
+                    bp_notifications_add_meta( $notification_id, 'task_title', $title );
+                    bp_notifications_add_meta( $notification_id, 'parent_type', $parent_type );
+                }
             }
         }
     }
