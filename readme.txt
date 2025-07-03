@@ -1,6 +1,6 @@
 ===  BuddyTask ===
 Contributors: cytechltd
-Tags:  BuddyTask, task management, task list, kanban, kan ban, buddypress
+Tags:  BuddyTask, task management, task list, kanban, buddypress
 Requires at least: 4.5
 Tested up to: 6.8.1
 Requires PHP: 5.3
