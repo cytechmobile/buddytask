@@ -1,10 +1,10 @@
 ===  BuddyTask ===
 Contributors: cytechltd
 Tags:  BuddyTask, task management, task list, kanban, buddypress
-Requires at least: 4.5
-Tested up to: 6.8.1
+Requires at least: 4.6.0
+Tested up to: 6.9
 Requires PHP: 5.3
-Stable tag: 1.3.0
+Stable tag: 1.4.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -64,6 +64,12 @@ Use the support forum of this plugin.
 9. BuddyTask settings inside a BuddyPress Group
 
 == Changelog ==
+
+= 1.4.0 =
+
+* Fixed all issues reported by PCP
+* Enforced a robust default authorization policy
+* Added support for WordPress version 6.9
 
 = 1.3.0 =
 

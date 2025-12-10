@@ -54,9 +54,7 @@ if ( class_exists( 'BP_Group_Extension' ) ) :
                 $group_id = $bp->groups->current_group->id;
             }
 
-            check_admin_referer( 'groups_create_save_' . $this->slug );
-
-            $this->persist_settings($group_id);
+            $this->persist_settings($group_id, true);
         }
 
         function edit_screen( $group_id = null ) {
@@ -85,7 +83,7 @@ if ( class_exists( 'BP_Group_Extension' ) ) :
         function edit_screen_save( $group_id = null ) {
             global $bp;
 
-            $save = sanitize_text_field($_POST['save']);
+            $save = isset( $_POST['save'] ) ? sanitize_text_field( wp_unslash( $_POST['save'] ) ) : null;
             if ($save == null)
                 return false;
 
@@ -95,7 +93,7 @@ if ( class_exists( 'BP_Group_Extension' ) ) :
 
             check_admin_referer( 'groups_edit_save_' . $this->slug );
 
-            $this->persist_settings($group_id);
+            $this->persist_settings($group_id, false);
 
             bp_core_add_message( esc_html__( 'Settings saved successfully', 'buddytask' ) );
 
@@ -124,17 +122,22 @@ if ( class_exists( 'BP_Group_Extension' ) ) :
         }
 
         function render_settings($group_id, $is_create){
+            if ( ! empty( $_POST ) ) {
+                $nonce_action = $is_create ? 'groups_create_save_' . $this->slug : 'groups_edit_save_' . $this->slug;
+                check_admin_referer( $nonce_action );
+            }
+
             $defaults =  buddytask_default_settings();
             $enabled = $is_create ? $defaults['enabled'] : buddytask_is_enabled($group_id);
 
             ?>
             <div class="wrap">
-                <h4><?php _e(  buddytask_get_name() . ' Settings', 'buddytask' ) ?></h4>
+                <h4><?php echo esc_html( buddytask_get_name() ) . ' ' . esc_html__( 'Settings', 'buddytask' ); ?></h4>
 
                 <fieldset>
                     <div class="field-group">
                         <div class="checkbox">
-                            <label><input type="checkbox" name=" buddytask_enabled" value="1" <?php checked( (bool) $enabled )?>> <?php _e( 'Activate', 'buddytask' ); ?></label>
+                            <label><input type="checkbox" name="buddytask_enabled" value="1" <?php checked( (bool) $enabled )?>> <?php echo esc_html__( 'Activate', 'buddytask' ); ?></label>
                         </div>
                     </div>
                 </fieldset>
@@ -142,8 +145,12 @@ if ( class_exists( 'BP_Group_Extension' ) ) :
             <?php
         }
 
-        function persist_settings($group_id){
-            buddytask_groups_update_groupmeta($group_id, 'buddytask_enabled', "0");
+        function persist_settings($group_id, $is_create = false){
+            $nonce_action = $is_create ? 'groups_create_save_' . $this->slug : 'groups_edit_save_' . $this->slug;
+            check_admin_referer( $nonce_action );
+
+            $enabled = isset( $_POST['buddytask_enabled'] ) ? 1 : 0;
+            groups_update_groupmeta( $group_id, 'buddytask_enabled', $enabled );
         }
 
         function get_groups_template_part( $slug ) {

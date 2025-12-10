@@ -74,16 +74,26 @@ jQuery(function(){
                                 </div>
                                 <div class = 'task-wrapper' id="` + task.uuid + `">
                                     <div class="task-title-block">
-                                        <div class="task-title">` + task.title + `</div>
-                                        <div class="task-menu dropdown">
-                                            <button type="submit" class="task-menu-button dropdown-toggle" data-toggle="dropdown"><i class="dashicons dashicons-ellipsis"></i></button>
-                                            <ul class="dropdown-menu drop-left">`;
+                                        <div class="task-title">` + task.title + `</div>`;
 
-                html += `<li><a href="#" class="edit-task-button editable"><i class="dashicons dashicons-edit"></i>` + btargs.lang.edit + `</a></li>`;
-                html += `<li class="divider"></li><li><a href="#" class="delete-task-button"><i class="dashicons dashicons-no"></i>` + btargs.lang.delete + `</a></li>`;
-                html += `</ul>
-                            </div>
-                            </div>
+                const menuItems = [];
+                if (btargs.permissions.edit_task) {
+                    menuItems.push(`<li><a href="#" class="edit-task-button editable"><i class="dashicons dashicons-edit"></i>` + btargs.lang.edit + `</a></li>`);
+                }
+                if (btargs.permissions.delete_task) {
+                    menuItems.push(`<li><a href="#" class="delete-task-button"><i class="dashicons dashicons-no"></i>` + btargs.lang.delete + `</a></li>`);
+                }
+
+                if(menuItems.length > 0) {
+                    html += `<div class="task-menu dropdown">
+                                <button type="submit" class="task-menu-button dropdown-toggle" data-toggle="dropdown"><i class="dashicons dashicons-ellipsis"></i></button>
+                                <ul class="dropdown-menu drop-left">
+                                    ` + menuItems.join('<li class="divider"></li>') + `
+                                </ul>
+                            </div>`;
+                }
+
+                html += `</div>
                             <div class="task-created-by" style="display: none">` + task.created_by + `</div>
                             <div class="task-description editable">` + task.description + `</div>
                             <div class="task-users task-info-block">
@@ -122,9 +132,11 @@ jQuery(function(){
         const lists = data.lists;
         lists.forEach(list => {
             let heading = "";
-            heading += `<h2 class="tasks-list-heading">` + list.name + `
-                            <button type="submit" class="add-new-task-button"><i class="dashicons dashicons-plus"></i></button>
-                        </h2>`;
+            heading += `<h2 class="tasks-list-heading">` + list.name;
+            if(btargs.permissions.add_task) {
+                heading += `<button type="submit" class="add-new-task-button"><i class="dashicons dashicons-plus"></i></button>`;
+            }
+            heading +=  `</h2>`;
             html += `<div class="tasks-list-wrapper">
                         <div class="tasks-list" id="` + list.uuid + `">
                              <div class = 'color-line-big'></div>` + heading +
@@ -143,8 +155,10 @@ jQuery(function(){
             const isInlineEditList = jQuery(e.target).is('h2');
             const isAddTaskButton = jQuery(e.target).is('i');
             if (isInlineEditList) {
-                const list = jQuery(this).closest('.tasks-list');
-                inlineEditList(list);
+                if(btargs.permissions.edit_board) {
+                    const list = jQuery(this).closest('.tasks-list');
+                    inlineEditList(list);
+                }
             } else if (isAddTaskButton) {
                 jQuery(this).addClass('autocomplete-loading');
                 isRefreshing = true;
@@ -185,10 +199,11 @@ jQuery(function(){
 
         jQuery('[data-toggle="dropdown"]').dropdown();
 
-        jQuery( ".edit-task-button" ).on( "click", openEditTaskDialog);
-        jQuery( ".view-task-button" ).on( "click", openEditTaskDialog);
-        jQuery( ".task-title" ).on( "mouseup", openEditTaskDialog);
-        jQuery( ".task-info-block" ).on( "mouseup", openEditTaskDialog);
+        if (btargs.permissions.edit_task) {
+            jQuery( ".edit-task-button" ).on( "click", openEditTaskDialog);
+            jQuery( ".task-title" ).on( "mouseup", openEditTaskDialog);
+            jQuery( ".task-info-block" ).on( "mouseup", openEditTaskDialog);
+        }
 
         let listBorderColors = [
             '#000963', '#375980', '#679999', '#fe641d'
@@ -204,83 +219,89 @@ jQuery(function(){
             i = (i + 1) % listBorderColors.length;
         });
 
-        jQuery('.tasks').sortable({
-            connectWith: ['.tasks'],
-            placeholder: "tasks-highlight",
-            scroll: true,
-            scrollSensitivity: 30,
-            scrollSpeed: 40,
-            start: function (e, ui) {
-                isDragging = true;
-                jQuery(this).attr('data-previndex', ui.item.index());
-                const list = jQuery(ui.item).closest('.tasks-list').attr('id');
-                jQuery(this).attr('data-prevlist', list);
+        if (btargs.permissions.reorder_task) {
+            jQuery('.tasks').sortable({
+                connectWith: ['.tasks'],
+                placeholder: "tasks-highlight",
+                scroll: true,
+                scrollSensitivity: 30,
+                scrollSpeed: 40,
+                start: function (e, ui) {
+                    isDragging = true;
+                    jQuery(this).attr('data-previndex', ui.item.index());
+                    const list = jQuery(ui.item).closest('.tasks-list').attr('id');
+                    jQuery(this).attr('data-prevlist', list);
 
-                // Mobile-specific setup
-                if ('ontouchstart' in window) {
-                    // Store last touch position
-                    let lastTouchY = 0;
+                    // Mobile-specific setup
+                    if ('ontouchstart' in window) {
+                        // Store last touch position
+                        let lastTouchY = 0;
 
-                    // Track touch position continuously
-                    jQuery(document).on('touchmove.buddytask', function(e) {
-                        lastTouchY = e.originalEvent.touches[0].clientY;
-                    });
+                        // Track touch position continuously
+                        jQuery(document).on('touchmove.buddytask', function(e) {
+                            lastTouchY = e.originalEvent.touches[0].clientY;
+                        });
 
-                    // Start scroll monitoring
-                    ui.item.data('scrollInterval', setInterval(function() {
-                        const $window = jQuery(window);
-                        const scrollTop = $window.scrollTop();
-                        const windowHeight = $window.height();
-                        const touchPosition = lastTouchY;
+                        // Start scroll monitoring
+                        ui.item.data('scrollInterval', setInterval(function() {
+                            const $window = jQuery(window);
+                            const scrollTop = $window.scrollTop();
+                            const windowHeight = $window.height();
+                            const touchPosition = lastTouchY;
 
-                        // Calculate distances from edges
-                        const distTop = touchPosition;
-                        const distBottom = windowHeight - touchPosition;
+                            // Calculate distances from edges
+                            const distTop = touchPosition;
+                            const distBottom = windowHeight - touchPosition;
 
-                        // Scroll up if near top
-                        if (distTop < 100) {
-                            $window.scrollTop(scrollTop - 20);
-                        }
-                        // Scroll down if near bottom
-                        else if (distBottom < 100) {
-                            $window.scrollTop(scrollTop + 20);
-                        }
-                    }, 50));
-                }
-            },
-            stop: function (e, ui) {
-                isDragging = false;
-                // Clear scroll interval and touch listener on mobile
-                if ('ontouchstart' in window) {
-                    if (ui.item.data('scrollInterval')) {
-                        clearInterval(ui.item.data('scrollInterval'));
+                            // Scroll up if near top
+                            if (distTop < 100) {
+                                $window.scrollTop(scrollTop - 20);
+                            }
+                            // Scroll down if near bottom
+                            else if (distBottom < 100) {
+                                $window.scrollTop(scrollTop + 20);
+                            }
+                        }, 50));
                     }
-                    jQuery(document).off('touchmove.buddytask');
-                }
+                },
+                stop: function (e, ui) {
+                    isDragging = false;
+                    // Clear scroll interval and touch listener on mobile
+                    if ('ontouchstart' in window) {
+                        if (ui.item.data('scrollInterval')) {
+                            clearInterval(ui.item.data('scrollInterval'));
+                        }
+                        jQuery(document).off('touchmove.buddytask');
+                    }
 
-                const task_id = ui.item.find('.task-wrapper').attr('id');
-                const task_index = jQuery(ui.item).parent().children('li').index(ui.item);
-                const newList = jQuery(ui.item).closest('.tasks-list').attr('id');
-                const oldList = jQuery(this).attr('data-prevlist');
-                const oldIndex = parseInt(jQuery(this).attr('data-previndex'));
+                    const task_id = ui.item.find('.task-wrapper').attr('id');
+                    const task_index = jQuery(ui.item).parent().children('li').index(ui.item);
+                    const newList = jQuery(ui.item).closest('.tasks-list').attr('id');
+                    const oldList = jQuery(this).attr('data-prevlist');
+                    const oldIndex = parseInt(jQuery(this).attr('data-previndex'));
 
-                if (oldIndex !== task_index || oldList !== newList) {
-                    reorderTask(newList, task_id, task_index);
-                }
+                    if (oldIndex !== task_index || oldList !== newList) {
+                        reorderTask(newList, task_id, task_index);
+                    }
 
-                jQuery(this).removeAttr('data-previndex');
-                jQuery(this).removeAttr('data-prevlist');
-            },
-            revert: 100
-        });
+                    jQuery(this).removeAttr('data-previndex');
+                    jQuery(this).removeAttr('data-prevlist');
+                },
+                revert: 100
+            });
+        }
 
         let buttons = {};
-        buttons[btargs.lang.delete] = function() {
-            const task_id = jQuery('#edit-task-form #edit-task-id').val();
-            openDeleteTaskConfirmationDialog(task_id);
-            editTaskDialog.dialog( "close" );
+        if (btargs.permissions.delete_task) {
+            buttons[btargs.lang.delete] = function() {
+                const task_id = jQuery('#edit-task-form #edit-task-id').val();
+                openDeleteTaskConfirmationDialog(task_id);
+                editTaskDialog.dialog( "close" );
+            }
         }
-        buttons[btargs.lang.submit] = editTask;
+        if (btargs.permissions.edit_task) {
+            buttons[btargs.lang.submit] = editTask;
+        }
         buttons[btargs.lang.cancel] = function() {
             editTaskDialog.dialog( "close" );
         }
@@ -304,8 +325,8 @@ jQuery(function(){
                     placeholder: "ui-state-highlight"
                 });
 
-                jQuery('.delete-assigned-user').on( 'click', function(e) {
-                    e.target.closest('.user-avatar').remove();
+                jQuery('#users-invite-list').off('click', '.delete-assigned-user').on('click', '.delete-assigned-user', function() {
+                    jQuery(this).closest('.user-avatar').remove();
                 });
 
                 const description = jQuery('#edit-task-form #edit-task-description').html();
@@ -912,7 +933,9 @@ jQuery(function(){
 
     function attachEditTaskFormEvents(){
         //attach the event to add new tasks in the list
-        autocomplete();
+        if (btargs.permissions.assign_members) {
+            autocomplete();
+        }
 
         initializeRichEditor();
         initializeDatePicker();
@@ -936,7 +959,7 @@ jQuery(function(){
                 <fieldset style="float: left; width: 73%">
                     <label htmlFor="edit-task-assign-to">`+btargs.lang.assign_to+`</label>
                     <input type="text" name="edit-task-assign-to" id="edit-task-assign-to"
-                           class="text ui-widget-content ui-corner-all">
+                           class="text ui-widget-content ui-corner-all" `+ (btargs.permissions.assign_members ? '' : 'disabled') +`>
                 </fieldset>
                 <fieldset style="float: left; width: 27%;">
                     <label htmlFor="edit-task-due-date">`+btargs.lang.due_date+`</label>

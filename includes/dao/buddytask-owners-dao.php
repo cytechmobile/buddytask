@@ -38,7 +38,7 @@ class BuddyTaskOwnersDAO {
                 'avatar_url' => $owner->getAvatarUrl(),
                 'assigned_at' => $owner->getAssignedAt()
             );
-
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery
 			$wpdb->update($table, $columns, array('id' => $owner->getId()), '%s', '%d');
 		} else {
             $columns = array(
@@ -49,7 +49,7 @@ class BuddyTaskOwnersDAO {
                 'avatar_url' => $owner->getAvatarUrl(),
                 'assigned_at' => $owner->getAssignedAt()
             );
-
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
 			$wpdb->insert($table, $columns);
 			$owner->setId($wpdb->insert_id);
 		}
@@ -65,12 +65,12 @@ class BuddyTaskOwnersDAO {
 	 * @return BuddyTaskOwner|null
 	 */
 	public function get($id) {
-		global $wpdb;
+        global $wpdb;
 
 		$table = BuddyTaskInstaller::getTasksOwnersTable();
-        $sql = $wpdb->prepare("SELECT * FROM ".$table." WHERE id = %d", intval($id));
-		$results = $wpdb->get_results($sql);
-		if (is_array($results) && count($results) > 0) {
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery
+        $results = $wpdb->get_results($wpdb->prepare("SELECT * FROM %i WHERE id = %d", array($table, intval($id))));
+        if (is_array($results) && count($results) > 0) {
 			return $this->populateOwnerData($results[0]);
 		}
 
@@ -89,8 +89,8 @@ class BuddyTaskOwnersDAO {
 
         $owners = array();
         $table = BuddyTaskInstaller::getTasksOwnersTable();
-        $sql = $wpdb->prepare("SELECT * FROM ".$table." WHERE task_id = %d order by id asc", $task_id);
-        $results = $wpdb->get_results($sql);
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery
+        $results = $wpdb->get_results($wpdb->prepare("SELECT * FROM %i WHERE task_id = %d order by id asc", array($table, $task_id)));
         if (is_array($results)) {
             foreach ($results as $result) {
                 $owners[] = $this->populateOwnerData($result);
@@ -112,8 +112,8 @@ class BuddyTaskOwnersDAO {
 
         $task_id = intval($task_id);
         $table = BuddyTaskInstaller::getTasksOwnersTable();
-        $sql = $wpdb->prepare("DELETE FROM ".$table." WHERE task_id = %d", $task_id);
-        $wpdb->get_results($sql);
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery
+        $wpdb->query($wpdb->prepare("DELETE FROM %i WHERE task_id = %d", array($table, $task_id)));
     }
 
 	/**
@@ -149,8 +149,8 @@ class BuddyTaskOwnersDAO {
         global $wpdb;
         $tasks = [];
         $table = BuddyTaskInstaller::getTasksOwnersTable();
-        $sql = $wpdb->prepare("SELECT * FROM ".$table." WHERE username = %s", $user_name);
-        $results = $wpdb->get_results($sql);
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery
+        $results = $wpdb->get_results($wpdb->prepare("SELECT * FROM %i WHERE username = %s", array($table, $user_name)));
         if (is_array($results) && count($results) > 0) {
             foreach ($results as $result) {
                 $tasks[] = $this->populateOwnerData($result);

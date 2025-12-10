@@ -33,6 +33,7 @@ class BuddyTaskListsDAO {
                 'name' => $list->getName()
             );
 
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery
 			$wpdb->update($table, $columns, array('id' => $list->getId()), '%s', '%d');
 		} else {
             $columns = array(
@@ -41,7 +42,8 @@ class BuddyTaskListsDAO {
                 'uuid' => $list->getUuid(), 
             );
 
-			$wpdb->insert($table, $columns);
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+            $wpdb->insert($table, $columns);
 			$list->setId($wpdb->insert_id);
 		}
 
@@ -56,12 +58,13 @@ class BuddyTaskListsDAO {
 	 * @return BuddyTaskList|null
 	 */
 	public function get($id) {
-		global $wpdb;
+        global $wpdb;
+        $table = BuddyTaskInstaller::getListsTable();
 
-		$table = BuddyTaskInstaller::getListsTable();
-        $sql = $wpdb->prepare("SELECT * FROM ". $table ." WHERE id = %d", intval($id));
-		$results = $wpdb->get_results($sql);
-		if (is_array($results) && count($results) > 0) {
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery
+		$results = $wpdb->get_results($wpdb->prepare("SELECT * FROM %i WHERE id = %d", array($table, intval($id))));
+
+        if (is_array($results) && count($results) > 0) {
 			return $this->populateListData($results[0]);
 		}
 
@@ -79,8 +82,8 @@ class BuddyTaskListsDAO {
         global $wpdb;
 
         $table = BuddyTaskInstaller::getListsTable();
-        $sql = $wpdb->prepare("SELECT * FROM ". $table ." WHERE uuid = %s", $uuid);
-        $results = $wpdb->get_results($sql);
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery
+        $results = $wpdb->get_results($wpdb->prepare("SELECT * FROM %i WHERE uuid = %s", array($table, $uuid)));
         if (is_array($results) && count($results) > 0) {
             return $this->populateListData($results[0]);
         }
@@ -100,8 +103,8 @@ class BuddyTaskListsDAO {
 
         $lists = array();
         $table = BuddyTaskInstaller::getListsTable();
-        $sql = $wpdb->prepare("SELECT * FROM ". $table ." WHERE board_id = %s order by id asc", $board_id);
-        $results = $wpdb->get_results($sql);
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery
+        $results = $wpdb->get_results($wpdb->prepare("SELECT * FROM %i WHERE board_id = %s order by id asc", array($table, $board_id)));
         if (is_array($results)) {
             foreach ($results as $result) {
                 $lists[] = $this->populateListData($result);
@@ -123,8 +126,8 @@ class BuddyTaskListsDAO {
 
         $id = intval($id);
         $table = BuddyTaskInstaller::getListsTable();
-        $sql = $wpdb->prepare("DELETE FROM ".$table." WHERE id = %d", $id);
-        $wpdb->get_results($sql);
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery
+        $wpdb->query($wpdb->prepare("DELETE FROM %i WHERE id = %d", array($table, $id)));
     }
 
 	/**
