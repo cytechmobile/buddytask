@@ -57,7 +57,7 @@ if ( class_exists( 'BP_Group_Extension' ) && bp_is_active( 'groups' ) ) :
 
             check_admin_referer( 'groups_create_save_' . $this->slug );
 
-            $this->persist_settings($group_id);
+            $this->persist_settings($group_id, true);
         }
 
         function edit_screen( $group_id = null ) {
@@ -84,7 +84,11 @@ if ( class_exists( 'BP_Group_Extension' ) && bp_is_active( 'groups' ) ) :
         }
 
         function edit_screen_save( $group_id = null ) {
-            $save = sanitize_text_field($_POST['save']);
+            if ( ! isset( $_POST['save'] ) ) {
+                return false;
+            }
+
+            $save = sanitize_text_field( wp_unslash( $_POST['save'] ) );
             if ($save == null)
                 return false;
 
@@ -94,7 +98,7 @@ if ( class_exists( 'BP_Group_Extension' ) && bp_is_active( 'groups' ) ) :
 
             check_admin_referer( 'groups_edit_save_' . $this->slug );
 
-            $this->persist_settings($group_id);
+            $this->persist_settings($group_id, false);
 
             bp_core_add_message( esc_html__( 'Settings saved successfully', 'buddytask' ) );
 
@@ -134,6 +138,11 @@ if ( class_exists( 'BP_Group_Extension' ) && bp_is_active( 'groups' ) ) :
         }
 
         function render_settings($group_id, $is_create){
+            if ( ! empty( $_POST ) ) {
+                $nonce_action = $is_create ? 'groups_create_save_' . $this->slug : 'groups_edit_save_' . $this->slug;
+                check_admin_referer( $nonce_action );
+            }
+
             $defaults =  buddytask_default_settings();
             $enabled = $is_create ? $defaults['enabled'] : buddytask_is_enabled($group_id);
 
@@ -154,7 +163,10 @@ if ( class_exists( 'BP_Group_Extension' ) && bp_is_active( 'groups' ) ) :
             <?php
         }
 
-        function persist_settings($group_id){
+        function persist_settings($group_id, $is_create = false){
+            $nonce_action = $is_create ? 'groups_create_save_' . $this->slug : 'groups_edit_save_' . $this->slug;
+            check_admin_referer( $nonce_action );
+
             $enabled = isset( $_POST['buddytask_enabled'] ) ? 1 : 0;
             groups_update_groupmeta( $group_id, 'buddytask_enabled', $enabled );
         }

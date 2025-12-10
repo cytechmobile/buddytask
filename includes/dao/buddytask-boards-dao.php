@@ -33,8 +33,9 @@ class BuddyTaskBoardsDAO {
                 'name' => $board->getName()
             );
 
-			$wpdb->update($table, $columns, array('id' => $board->getId()), '%s', '%d');
-		} else {
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery
+            $wpdb->update($table, $columns, array('id' => $board->getId()), '%s', '%d');
+        } else {
             $columns = array(
                 'post_id' => $board->getPostId(), //post id
                 'group_id' => $board->getGroupId(), //bp group id
@@ -44,6 +45,7 @@ class BuddyTaskBoardsDAO {
                 'created_by' => $board->getCreatedBy(), // the user who created the board
             );
 
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
 			$wpdb->insert($table, $columns);
 			$board->setId($wpdb->insert_id);
 		}
@@ -59,12 +61,13 @@ class BuddyTaskBoardsDAO {
 	 * @return BuddyTaskBoard|null
 	 */
 	public function get($id) {
-		global $wpdb;
+        global $wpdb;
 
 		$table = BuddyTaskInstaller::getBoardsTable();
-        $sql = $wpdb->prepare("SELECT * FROM ". $table ." WHERE id = %d", intval($id));
-		$results = $wpdb->get_results($sql);
-		if (is_array($results) && count($results) > 0) {
+
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery
+		$results = $wpdb->get_results($wpdb->prepare("SELECT * FROM %i WHERE id = %d", array($table, intval($id))));
+        if (is_array($results) && count($results) > 0) {
 			return $this->populateBoardData($results[0]);
 		}
 
@@ -77,13 +80,14 @@ class BuddyTaskBoardsDAO {
 	 * @return BuddyTaskBoard[]
 	 */
 	public function getAll() {
-		global $wpdb;
+        global $wpdb;
 
 		$boards = array();
 		$table = BuddyTaskInstaller::getBoardsTable();
-        $sql = $wpdb->prepare("SELECT * FROM ".$table." ORDER BY name ASC");
-		$results = $wpdb->get_results($sql);
-		if (is_array($results)) {
+
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery
+		$results = $wpdb->get_results($wpdb->prepare("SELECT * FROM %i ORDER BY name ASC", array($table)));
+        if (is_array($results)) {
 			foreach ($results as $result) {
 				$boards[] = $this->populateBoardData($result);
 			}
@@ -100,13 +104,12 @@ class BuddyTaskBoardsDAO {
 	 * @return BuddyTaskBoard|null
 	 */
 	public function getByName($name) {
-		global $wpdb;
+        global $wpdb;
 
-		$name = addslashes($name);
 		$table = BuddyTaskInstaller::getBoardsTable();
-        $sql = $wpdb->prepare("SELECT * FROM ". $name ." WHERE name = %s", $name);
-		$results = $wpdb->get_results($sql);
-		if (is_array($results) && count($results) > 0) {
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery
+		$results = $wpdb->get_results($wpdb->prepare("SELECT * FROM %i WHERE name = %s", array($table, $name)));
+        if (is_array($results) && count($results) > 0) {
 			return $this->populateBoardData($results[0]);
 		}
 
@@ -124,8 +127,8 @@ class BuddyTaskBoardsDAO {
         global $wpdb;
 
         $table = BuddyTaskInstaller::getBoardsTable();
-        $sql = $wpdb->prepare("SELECT * FROM ". $table ." WHERE uuid = %s", $uuid);
-        $results = $wpdb->get_results($sql);
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery
+        $results = $wpdb->get_results($wpdb->prepare("SELECT * FROM %i WHERE uuid = %s", array($table, $uuid)));
         if (is_array($results) && count($results) > 0) {
             return $this->populateBoardData($results[0]);
         }
@@ -145,8 +148,8 @@ class BuddyTaskBoardsDAO {
 
         $boards = array();
         $table = BuddyTaskInstaller::getBoardsTable();
-        $sql = $wpdb->prepare("SELECT * FROM ". $table ." WHERE group_id = %s", $group_id);
-        $results = $wpdb->get_results($sql);
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery
+        $results = $wpdb->get_results($wpdb->prepare("SELECT * FROM %i WHERE group_id = %s", array($table, $group_id)));
         if (is_array($results)) {
             foreach ($results as $result) {
                 $boards[] = $this->populateBoardData($result);
@@ -161,8 +164,8 @@ class BuddyTaskBoardsDAO {
 
         $boards = array();
         $table = BuddyTaskInstaller::getBoardsTable();
-        $sql = $wpdb->prepare("SELECT * FROM ".$table." WHERE post_id = %s", $post_id);
-        $results = $wpdb->get_results($sql);
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery
+        $results = $wpdb->get_results($wpdb->prepare("SELECT * FROM %i WHERE post_id = %s", array($table, $post_id)));
         if (is_array($results)) {
             foreach ($results as $result) {
                 $boards[] = $this->populateBoardData($result);
@@ -184,8 +187,8 @@ class BuddyTaskBoardsDAO {
 
         $id = intval($id);
         $table = BuddyTaskInstaller::getBoardsTable();
-        $sql = $wpdb->prepare("DELETE FROM ".$table." WHERE id = %d", $id);
-        $wpdb->get_results($sql);
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery
+        $wpdb->query($wpdb->prepare("DELETE FROM %i WHERE id = %d", array($table, $id)));
     }
 
 	/**

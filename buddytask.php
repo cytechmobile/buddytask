@@ -130,15 +130,12 @@ if (! class_exists('buddytask')) :
          */
         private function setup_actions()
         {
-            //add_action( 'wp_head', array( $this, 'buddytask_core_add_ajax_url_js') );
-
             add_action('wp_enqueue_scripts', array($this, 'enqueue_styles'));
             add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts'));
 
             add_action('wpmu_new_blog', array('BuddyTaskInstaller', 'newBlog'), 10, 6);
             add_action('delete_blog', array('BuddyTaskInstaller', 'deleteBlog'), 10, 6);
 
-            add_action('bp_loaded',  array($this, 'load_textdomain'));
             add_action('bp_include', array($this, 'load_component'));
 
             add_shortcode('buddytask', array($this, 'buddytask_shortcode'));
@@ -214,25 +211,6 @@ if (! class_exists('buddytask')) :
         }
 
         /**
-         * Loads the translation
-         *
-         * @package  buddytask
-         * @since 1.0.0
-         * @uses get_locale()
-         * @uses load_textdomain()
-         */
-        public function load_textdomain()
-        {
-            $locale = apply_filters('buddytask_load_textdomain_get_locale', get_locale(), $this->domain);
-            $mofile = sprintf('%1$s-%2$s.mo', $this->domain, $locale);
-            $mofile_global = WP_LANG_DIR . '/buddytask/' . $mofile;
-
-            if (! load_textdomain($this->domain, $mofile_global)) {
-                load_plugin_textdomain($this->domain, false, basename($this->plugin_dir) . '/languages');
-            }
-        }
-
-        /**
          * Finally, Load the component
          *
          * @package  buddytask
@@ -292,8 +270,8 @@ if (! class_exists('buddytask')) :
                     }
                 }
 
-                wp_enqueue_script('hooks-js', get_home_url() . '/wp-includes/js/dist/hooks.js', array('jquery'), buddytask_get_version());
-                wp_enqueue_script('heartbeat-js', get_home_url() . '/wp-includes/js/heartbeat.js', array('jquery'), buddytask_get_version());
+                wp_enqueue_script('hooks-js', get_home_url() . '/wp-includes/js/dist/hooks.js', array('jquery'), buddytask_get_version(), true);
+                wp_enqueue_script('heartbeat-js', get_home_url() . '/wp-includes/js/heartbeat.js', array('jquery'), buddytask_get_version(), true);
                 wp_add_inline_script('heartbeat-js', "var ajaxurl = '" . admin_url('admin-ajax.php') . "';", true);
 
                 // Load some bundled WP resources
@@ -301,9 +279,9 @@ if (! class_exists('buddytask')) :
                 wp_enqueue_script('jquery-ui-dialog');
                 wp_enqueue_script('jquery-dropdown');
                 wp_enqueue_script('jquery-effects-core');
+                wp_enqueue_script('jquery-touch-punch');
                 wp_enqueue_editor();
 
-                wp_enqueue_script('jquery-touch-punch', 'jquery.ui.touch-punch.js', array('jquery', 'jquery-ui-sortable'), buddytask_get_version());
                 wp_enqueue_script('buddytask-js', buddytask_get_plugin_url() . "assets/js/buddytask.js", array('jquery'), buddytask_get_version());
                 wp_localize_script('buddytask-js', 'btargs', array(
                     'lang' => array(
@@ -448,7 +426,9 @@ if (! class_exists('buddytask')) :
             $warnings = $resolve = array();
 
             if (! self::version_check()) {
+                /* translators: %s: BuddyPress version */
                 $warnings[] = sprintf(esc_html__('BuddyTask requires at least version %s of BuddyPress.', 'buddytask'), self::$required_bp_version);
+                /* translators: %s: BuddyPress version */
                 $resolve[]  = sprintf(esc_html__('Upgrade BuddyPress to at least version %s', 'buddytask'), self::$required_bp_version);
             }
 
@@ -473,6 +453,7 @@ if (! class_exists('buddytask')) :
                 if (is_super_admin()) {
                     $deactivate_link = ! empty($config['network_active']) ? network_admin_url('plugins.php') : admin_url('plugins.php');
                     $deactivate_link = '<a href="' . esc_url($deactivate_link) . '">' . esc_html__('deactivate', 'buddytask') . '</a>';
+                    /* translators: %s: deactivate link */
                     $resolve_message = '<ol><li>' . sprintf(esc_html__('You should %s  buddytask', 'buddytask'), $deactivate_link) . '</li>';
 
                     foreach ((array) $resolve as $step) {
@@ -555,7 +536,8 @@ if (! class_exists('buddytask')) :
 
                 $board = new BuddyTaskBoard();
                 $board->setUuid(wp_generate_uuid4());
-                $board->setName(sprintf(esc_html__('Board %s'), time()));
+                /* translators: %s: timestamp */
+                $board->setName(sprintf(esc_html__('Board %s', 'buddytask'), time()));
                 if ($group_id > 0) {
                     $board->setGroupId($group_id);
                 } else {
@@ -620,13 +602,16 @@ if (! class_exists('buddytask')) :
         {
             check_ajax_referer('buddytask_add_new_task');
 
-            $list_uuid = isset($_REQUEST['list_id']) && wp_is_uuid($_REQUEST['list_id']) ? sanitize_text_field($_REQUEST['list_id']) : false;
-            if (!$list_uuid) {
+            $list_uuid = isset($_REQUEST['list_id']) ? sanitize_text_field(wp_unslash($_REQUEST['list_id'])) : false;
+            if (!$list_uuid || !wp_is_uuid($list_uuid)) {
                 return;
             }
 
-            $parent_uuid = isset($_REQUEST['parent_id']) && wp_is_uuid($_REQUEST['parent_id']) ? sanitize_text_field($_REQUEST['parent_id']) : false;
-            $position = isset($_REQUEST['position']) && is_numeric($_REQUEST['position']) ? intval($_REQUEST['position']) : 0;
+            $parent_uuid = isset($_REQUEST['parent_id']) ? sanitize_text_field(wp_unslash($_REQUEST['parent_id'])) : false;
+            if ($parent_uuid && !wp_is_uuid($parent_uuid)) {
+                $parent_uuid = false;
+            }
+            $position = isset($_REQUEST['position']) ? intval(wp_unslash($_REQUEST['position'])) : 0;
 
             $group_id = isset($_REQUEST['group_id']) ? (int) $_REQUEST['group_id'] : 0;
             $post_id = 0;
@@ -689,9 +674,9 @@ if (! class_exists('buddytask')) :
                 }
             }
 
-            $search_terms =  isset($_REQUEST['term']) ? sanitize_text_field($_REQUEST['term']) : null;
+            $search_terms =  isset($_REQUEST['term']) ? sanitize_text_field(wp_unslash($_REQUEST['term'])) : null;
             $task_assign_to = isset($_REQUEST['task_assign_to']) && is_array($_REQUEST['task_assign_to']) ?
-                array_map('absint', $_REQUEST['task_assign_to']) : array();
+                array_map('absint', wp_unslash($_REQUEST['task_assign_to'])) : array();
 
             $args = array();
             $exclude = array();
@@ -700,6 +685,7 @@ if (! class_exists('buddytask')) :
             }
 
             if (!empty($exclude)) {
+                // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
                 $args['exclude'] = $exclude;
             }
 
@@ -770,7 +756,7 @@ if (! class_exists('buddytask')) :
                 bp_core_get_userlink($user->id, true) :
                 $user->display_name;
 
-            echo sprintf($this->get_assign_list_entry_template(), esc_attr($user->id), wp_kses_post($avatar), esc_url($userlink), esc_attr($username));
+            echo wp_kses_post(sprintf($this->get_assign_list_entry_template(), esc_attr($user->id), wp_kses_post($avatar), esc_url($userlink), esc_attr($username)));
 
             die();
         }
@@ -799,14 +785,17 @@ if (! class_exists('buddytask')) :
                 }
             }
 
-            $task_uuid = isset($_REQUEST['task_id']) && wp_is_uuid($_REQUEST['task_id']) ? sanitize_text_field($_REQUEST['task_id']) : null;
-            $task_title = isset($_REQUEST['task_title']) ? wp_unslash(sanitize_text_field($_REQUEST['task_title'])) : null;
-            $task_description = isset($_REQUEST['task_description']) ? wp_unslash(wp_kses_post($_REQUEST['task_description'])) : null;
-            $task_due_date = isset($_REQUEST['task_due_date']) && !empty($_REQUEST['task_due_date']) && is_numeric($_REQUEST['task_due_date']) ?
-                floatval($_REQUEST['task_due_date']) : null;
+            $task_uuid = isset($_REQUEST['task_id']) ? sanitize_text_field(wp_unslash($_REQUEST['task_id'])) : null;
+            if ($task_uuid && !wp_is_uuid($task_uuid)) {
+                $task_uuid = null;
+            }
+            $task_title = isset($_REQUEST['task_title']) ? sanitize_text_field(wp_unslash($_REQUEST['task_title'])) : null;
+            $task_description = isset($_REQUEST['task_description']) ? wp_kses_post(wp_unslash($_REQUEST['task_description'])) : null;
+            $task_due_date = isset($_REQUEST['task_due_date']) && !empty($_REQUEST['task_due_date']) ?
+                floatval(sanitize_text_field(wp_unslash($_REQUEST['task_due_date']))) : null;
             $task_assign_to = isset($_REQUEST['task_assign_to']) && is_array($_REQUEST['task_assign_to']) ?
-                array_map('absint', $_REQUEST['task_assign_to']) : array();
-            $task_todos =  isset($_REQUEST['task_todos']) ? json_decode(wp_unslash(sanitize_text_field($_REQUEST['task_todos']))) : null;
+                array_map('absint', wp_unslash($_REQUEST['task_assign_to'])) : array();
+            $task_todos =  isset($_REQUEST['task_todos']) ? json_decode(sanitize_text_field(wp_unslash($_REQUEST['task_todos']))) : null;
 
             $logged_in_user = get_current_user_id();
 
@@ -911,13 +900,10 @@ if (! class_exists('buddytask')) :
                 }
             }
 
-            $task_uuid = isset($_REQUEST['task_id']) && wp_is_uuid($_REQUEST['task_id']) ? sanitize_text_field($_REQUEST['task_id']) : null;
-            if ($task_uuid === null) {
+            $task_uuid = isset($_REQUEST['task_id']) ? sanitize_text_field(wp_unslash($_REQUEST['task_id'])) : null;
+            if ($task_uuid === null || !wp_is_uuid($task_uuid)) {
                 return false;
             }
-
-            require_once(buddytask_get_includes_dir() . 'dao/buddytask-tasks-dao.php');
-            require_once(buddytask_get_includes_dir() . 'dao/buddytask-owners-dao.php');
 
             $tasksDao = new BuddyTaskTasksDAO();
             $ownersDao = new BuddyTaskOwnersDAO();
@@ -955,10 +941,19 @@ if (! class_exists('buddytask')) :
                 }
             }
 
-            $task_uuid = isset($_REQUEST['task_id']) && wp_is_uuid($_REQUEST['task_id']) ? sanitize_text_field($_REQUEST['task_id']) : null;
-            $list_uuid = isset($_REQUEST['list_id']) && wp_is_uuid($_REQUEST['list_id']) ? sanitize_text_field($_REQUEST['list_id']) : null;
-            $parent_uuid = isset($_REQUEST['parent_id']) && wp_is_uuid($_REQUEST['parent_id']) ? sanitize_text_field($_REQUEST['parent_id']) : null;
-            $task_index = isset($_REQUEST['task_index']) && is_numeric($_REQUEST['task_index']) ? intval($_REQUEST['task_index']) : null;
+            $task_uuid = isset($_REQUEST['task_id']) ? sanitize_text_field(wp_unslash($_REQUEST['task_id'])) : null;
+            if ($task_uuid && !wp_is_uuid($task_uuid)) {
+                $task_uuid = null;
+            }
+            $list_uuid = isset($_REQUEST['list_id']) ? sanitize_text_field(wp_unslash($_REQUEST['list_id'])) : null;
+            if ($list_uuid && !wp_is_uuid($list_uuid)) {
+                $list_uuid = null;
+            }
+            $parent_uuid = isset($_REQUEST['parent_id']) ? sanitize_text_field(wp_unslash($_REQUEST['parent_id'])) : null;
+            if ($parent_uuid && !wp_is_uuid($parent_uuid)) {
+                $parent_uuid = null;
+            }
+            $task_index = isset($_REQUEST['task_index']) ? intval(wp_unslash($_REQUEST['task_index'])) : null;
 
             if (isset($task_uuid) && isset($list_uuid) && isset($task_index) && $task_index >= 0) {
                 require_once(buddytask_get_includes_dir() . 'dao/buddytask-lists-dao.php');
@@ -997,7 +992,10 @@ if (! class_exists('buddytask')) :
                 }
             }
 
-            $parent_uuid = isset($_REQUEST['parent_id']) && wp_is_uuid($_REQUEST['parent_id']) ? sanitize_text_field($_REQUEST['parent_id']) : null;
+            $parent_uuid = isset($_REQUEST['parent_id']) ? sanitize_text_field(wp_unslash($_REQUEST['parent_id'])) : null;
+            if ($parent_uuid && !wp_is_uuid($parent_uuid)) {
+                $parent_uuid = null;
+            }
             $tasks = array();
             if (isset($parent_uuid)) {
                 require_once(buddytask_get_includes_dir() . 'dao/buddytask-tasks-dao.php');
@@ -1028,8 +1026,11 @@ if (! class_exists('buddytask')) :
                 }
             }
 
-            $list_uuid = isset($_REQUEST['id']) && wp_is_uuid($_REQUEST['id']) ? sanitize_text_field($_REQUEST['id']) : null;
-            $list_name = isset($_REQUEST['name']) ? sanitize_text_field($_REQUEST['name']) : null;
+            $list_uuid = isset($_REQUEST['id']) ? sanitize_text_field(wp_unslash($_REQUEST['id'])) : null;
+            if ($list_uuid && !wp_is_uuid($list_uuid)) {
+                $list_uuid = null;
+            }
+            $list_name = isset($_REQUEST['name']) ? sanitize_text_field(wp_unslash($_REQUEST['name'])) : null;
             if (isset($list_uuid) && isset($list_name)) {
                 require_once(buddytask_get_includes_dir() . 'dao/buddytask-lists-dao.php');
 
@@ -1123,17 +1124,6 @@ if (! class_exists('buddytask')) :
                         'date_notified'     => bp_core_current_time(), // It's best practice to include the timestamp.
                         'is_new'            => 1,                      // Explicitly mark as a new notification.
                     ));
-
-                    error_log(json_encode(array(
-                        'user_id'           => (int) $user_id,
-                        'item_id'           => (int) $task_id,
-                        'secondary_item_id' => (int) $secondary_item_id,
-                        'component_name'    => buddytask_get_slug(), // Assuming this function returns your component's slug.
-                        'component_action'  => $action,
-                        'date_notified'     => bp_core_current_time(), // It's best practice to include the timestamp.
-                        'is_new'            => 1,
-                        'id' => $notification_id // Explicitly mark as a new notification.
-                    )));
 
                     // Only add meta if the notification was successfully created.
                     if ($notification_id) {

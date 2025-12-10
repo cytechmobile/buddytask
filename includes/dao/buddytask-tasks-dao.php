@@ -41,6 +41,7 @@ class BuddyTaskTasksDAO {
                 'position' => $task->getPosition()
             );
 
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery
 			$wpdb->update($table, $columns, array('id' => $task->getId()), '%s', '%d');
 		} else {
             $columns = array(
@@ -59,6 +60,7 @@ class BuddyTaskTasksDAO {
                 'position' => $task->getPosition()
             );
 
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
 			$wpdb->insert($table, $columns);
 			$task->setId($wpdb->insert_id);
 		}
@@ -74,12 +76,12 @@ class BuddyTaskTasksDAO {
 	 * @return BuddyTaskTask|null
 	 */
 	public function get($id) {
-		global $wpdb;
+            global $wpdb;
 
-		$table = BuddyTaskInstaller::getTasksTable();
-        $sql = $wpdb->prepare("SELECT * FROM ".$table." WHERE id = %d", intval($id));
-		$results = $wpdb->get_results($sql);
-		if (is_array($results) && count($results) > 0) {
+		    $table = BuddyTaskInstaller::getTasksTable();
+		    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery
+			$results = $wpdb->get_results($wpdb->prepare("SELECT * FROM %i WHERE id = %d", array($table, intval($id))));
+            if (is_array($results) && count($results) > 0) {
 			return $this->populateTaskData($results[0]);
 		}
 
@@ -100,11 +102,12 @@ class BuddyTaskTasksDAO {
         $tasks = array();
         $table = BuddyTaskInstaller::getTasksTable();
         if($sub_tasks) {
-            $sql = $wpdb->prepare("SELECT * FROM ". $table ." WHERE list_id = %s order by position asc", $list_id);
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery
+            $results = $wpdb->get_results($wpdb->prepare("SELECT * FROM %i WHERE list_id = %s order by position asc", array($table, $list_id)));
         } else {
-            $sql = $wpdb->prepare("SELECT * FROM ". $table ." WHERE list_id = %s AND parent_id is null order by position asc", $list_id);
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery
+            $results = $wpdb->get_results($wpdb->prepare("SELECT * FROM %i WHERE list_id = %s AND parent_id is null order by position asc", array($table, $list_id)));
         }
-        $results = $wpdb->get_results($sql);
         if (is_array($results)) {
             foreach ($results as $result) {
                 $tasks[] = $this->populateTaskData($result);
@@ -126,8 +129,8 @@ class BuddyTaskTasksDAO {
 
         $tasks = array();
         $table = BuddyTaskInstaller::getTasksTable();
-        $sql = $wpdb->prepare("SELECT * FROM ". $table ." WHERE parent_id = %d order by position asc", $parent_id);
-        $results = $wpdb->get_results($sql);
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery
+        $results = $wpdb->get_results($wpdb->prepare("SELECT * FROM %i WHERE parent_id = %d order by position asc", array($table, $parent_id)));
         if (is_array($results)) {
             foreach ($results as $result) {
                 $tasks[] = $this->populateTaskData($result);
@@ -148,8 +151,8 @@ class BuddyTaskTasksDAO {
         global $wpdb;
 
         $table = BuddyTaskInstaller::getTasksTable();
-        $sql = $wpdb->prepare("SELECT * FROM ". $table ." WHERE uuid = %s", $uuid);
-        $results = $wpdb->get_results($sql);
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery
+        $results = $wpdb->get_results($wpdb->prepare("SELECT * FROM %i WHERE uuid = %s", array($table, $uuid)));
         if (is_array($results) && count($results) > 0) {
             return $this->populateTaskData($results[0]);
         }
@@ -169,8 +172,8 @@ class BuddyTaskTasksDAO {
 
         $id = intval($id);
         $table = BuddyTaskInstaller::getTasksTable();
-        $sql = $wpdb->prepare("DELETE FROM ". $table ." WHERE id = %d", $id);
-        $wpdb->get_results($sql);
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery
+        $wpdb->query($wpdb->prepare("DELETE FROM %i WHERE id = %d", array($table, $id)));
     }
 
     /**
@@ -185,8 +188,8 @@ class BuddyTaskTasksDAO {
 
         $parent_id = intval($parent_id);
         $table = BuddyTaskInstaller::getTasksTable();
-        $sql = $wpdb->prepare("DELETE FROM ". $table ." WHERE parent_id = %d", $parent_id);
-        $wpdb->get_results($sql);
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery
+        $wpdb->query($wpdb->prepare("DELETE FROM %i WHERE parent_id = %d", array($table, $parent_id)));
     }
 
     /**
@@ -205,13 +208,14 @@ class BuddyTaskTasksDAO {
         }
 
         //begin transaction
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery
         $wpdb->query('START TRANSACTION');
 
         $table = BuddyTaskInstaller::getTasksTable();
 
         //try to locate the task to reorder
-        $sql = $wpdb->prepare("SELECT * FROM ". $table ." WHERE uuid = %s FOR UPDATE", $task_uuid);
-        $results = $wpdb->get_results($sql);
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery
+        $results = $wpdb->get_results($wpdb->prepare("SELECT * FROM %i WHERE uuid = %s FOR UPDATE", array($table, $task_uuid)));
         $task = null;
         if (is_array($results) && count($results) > 0) {
             $task = $this->populateTaskData($results[0]);
@@ -226,13 +230,14 @@ class BuddyTaskTasksDAO {
         //now get all the tasks of the target list or parent
         $task_id = $task->getId();
         if($parent_id === null){
-            $sql = $wpdb->prepare("SELECT * FROM ". $table ." WHERE list_id = %d AND id != %d ORDER BY position FOR UPDATE", $list_id, $task_id);
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery
+            $results = $wpdb->get_results($wpdb->prepare("SELECT * FROM %i WHERE list_id = %d AND id != %d ORDER BY position FOR UPDATE", array($table, $list_id, $task_id)));
         } else {
-            $sql = $wpdb->prepare("SELECT * FROM ". $table ." WHERE parent_id = %d AND id != %d ORDER BY position FOR UPDATE", $parent_id, $task_id);
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery
+            $results = $wpdb->get_results($wpdb->prepare("SELECT * FROM %i WHERE parent_id = %d AND id != %d ORDER BY position FOR UPDATE", array($table, $parent_id, $task_id)));
         }
 
         $tasks = array();
-        $results = $wpdb->get_results($sql);
         if (is_array($results)) {
             foreach ($results as $result) {
                 $tasks[] = $this->populateTaskData($result);
@@ -246,9 +251,11 @@ class BuddyTaskTasksDAO {
                 $task->setPosition($index);
                 $this->save($task);
             }
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery
             $wpdb->query('COMMIT');
             return true;
         } catch (Exception $e){
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery
             $wpdb->query('ROLLBACK');
             return false;
         }

@@ -113,16 +113,20 @@ class  BuddyTask_Component extends BP_Component {
         $text = null;
         switch ( $action ) {
             case 'add_task_member':
-                $text = sprintf( __( '%s: You have been assigned to task <b>%s</b>', 'buddytask' ), $name, $title );
+                /* translators: %1$s: board name, %2$s: task title */
+                $text = sprintf( __( '%1$s: You have been assigned to task %2$s', 'buddytask' ), $name, '<b>' . $title . '</b>' );
                 break;
             case 'delete_task_member':
-                $text = sprintf( __( '%s: You have been removed from task <b>%s</b>', 'buddytask' ), $name, $title );
+                /* translators: %1$s: board name, %2$s: task title */
+                $text = sprintf( __( '%1$s: You have been removed from task %2$s', 'buddytask' ), $name, '<b>' . $title . '</b>' );
                 break;
             case 'edit_task':
-                $text = sprintf( __( '%s: Task <b>%s</b> has been updated', 'buddytask' ), $name, $title );
+                /* translators: %1$s: board name, %2$s: task title */
+                $text = sprintf( __( '%1$s: Task %2$s has been updated', 'buddytask' ), $name, '<b>' . $title . '</b>' );
                 break;
             case 'delete_task':
-                $text = sprintf( __( '%s: Task <b>%s</b> has been deleted from the task board', 'buddytask' ), $name, $title );
+                /* translators: %1$s: board name, %2$s: task title */
+                $text = sprintf( __( '%1$s: Task %2$s has been deleted from the task board', 'buddytask' ), $name, '<b>' . $title . '</b>' );
                 break;
         }
         return isset($text) ? '<a href="' . esc_url($link) . '">' . wp_kses_post($text) . '</a>' : null;

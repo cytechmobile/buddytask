@@ -112,9 +112,10 @@ function buddytask_get_plugin_url() {
  */
 function buddytask_add_activation_redirect() {
 	// Bail if activating from network, or bulk
-	if ( isset( $_GET['activate-multi'] ) && is_bool($_GET['activate-multi']))
-		return;
-
+    // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+    if ( isset( $_GET['activate-multi'] ) && is_bool($_GET['activate-multi'])) {
+        return;
+    }
 	// Record that this is a new installation, so we show the right
 	// welcome message
 	if (  buddytask_is_install() ) {
@@ -149,22 +150,6 @@ function buddytask_default_settings(){
         'lists' => array('Backlog', 'Todo', 'Doing', 'Done')
     );
     return apply_filters( 'buddytask_default_settings', $defaults );
-}
-
-function buddytask_groups_get_groupmeta($group_id, $meta_key, $default){
-    $value = groups_get_groupmeta( $group_id, $meta_key, true);
-    if(!$value){
-        $value = $default;
-    }
-    return $value;
-}
-
-function buddytask_groups_update_groupmeta($group_id, $meta_key, $default){
-    $value = sanitize_meta($meta_key, $_POST[$meta_key], 'bp_groups');
-    if(!$value){
-        $value = $default;
-    }
-    groups_update_groupmeta( $group_id, $meta_key, $value );
 }
 
 function buddytask_is_enabled($group_id = false){

@@ -41,6 +41,7 @@ class BuddyTaskInstaller {
 		if (function_exists('is_multisite') && is_multisite()) {
 			if ($networkWide) {
 				$oldBlogID = $wpdb->blogid;
+                // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery
 				$blogIDs = $wpdb->get_col("SELECT blog_id FROM $wpdb->blogs");
 				foreach ($blogIDs as $blogID) {
 					switch_to_blog($blogID);
@@ -179,6 +180,7 @@ class BuddyTaskInstaller {
 
 		if (function_exists('is_multisite') && is_multisite()) {
 			$oldBlogID = $wpdb->blogid;
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery
 			$blogIDs = $wpdb->get_col("SELECT blog_id FROM $wpdb->blogs");
 			foreach ($blogIDs as $blogID) {
 				switch_to_blog($blogID);
@@ -203,21 +205,21 @@ class BuddyTaskInstaller {
 		}
         
         global $wpdb;
-		
-		$tableName = self::getBoardsTable();
-		$sql = "DROP TABLE IF EXISTS {$tableName};";
-		$wpdb->query($sql);
-		
-		$tableName = self::getListsTable();
-		$sql = "DROP TABLE IF EXISTS {$tableName};";
-		$wpdb->query($sql);
 
-		$tableName = self::getTasksTable();
-		$sql = "DROP TABLE IF EXISTS {$tableName};";
-		$wpdb->query($sql);
-		
-		$tableName = self::getTasksOwnersTable();
-		$sql = "DROP TABLE IF EXISTS {$tableName};";
-		$wpdb->query($sql);
+		$table = self::getBoardsTable();
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.SchemaChange
+		$wpdb->query($wpdb->prepare("DROP TABLE IF EXISTS %i", array($table)));
+
+		$table = self::getListsTable();
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.SchemaChange
+		$wpdb->query($wpdb->prepare("DROP TABLE IF EXISTS %i", array($table)));
+
+		$table = self::getTasksTable();
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.SchemaChange
+		$wpdb->query($wpdb->prepare("DROP TABLE IF EXISTS %i", array($table)));
+
+		$table = self::getTasksOwnersTable();
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.SchemaChange
+		$wpdb->query($wpdb->prepare("DROP TABLE IF EXISTS %i", array($table)));
 	}
 }
